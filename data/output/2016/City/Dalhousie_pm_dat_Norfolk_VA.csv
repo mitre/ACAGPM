@@ -1,0 +1,332 @@
+"GEOID","NAME","Particulate.Matter"
+"51710000100","Census Tract 1, Norfolk city, Virginia",7.10730048687041
+"51710000700","Census Tract 7, Norfolk city, Virginia",7.07996134743287
+"51710001100","Census Tract 11, Norfolk city, Virginia",7.23149594292543
+"51710001500","Census Tract 15, Norfolk city, Virginia",6.91029978977965
+"51710002300","Census Tract 23, Norfolk city, Virginia",6.62737318003916
+"51710002600","Census Tract 26, Norfolk city, Virginia",6.99129559046387
+"51710003100","Census Tract 31, Norfolk city, Virginia",7.0231694257826
+"51710003700","Census Tract 37, Norfolk city, Virginia",7.10011092335631
+"51710003800","Census Tract 38, Norfolk city, Virginia",6.9016772397907
+"51710004001","Census Tract 40.01, Norfolk city, Virginia",7.0999999046323
+"51710004002","Census Tract 40.02, Norfolk city, Virginia",6.91733332139413
+"51710004100","Census Tract 41, Norfolk city, Virginia",7.09999990463257
+"51710004600","Census Tract 46, Norfolk city, Virginia",7.02456558797744
+"51710005100","Census Tract 51, Norfolk city, Virginia",7.08106653713955
+"51710005602","Census Tract 56.02, Norfolk city, Virginia",7.09999990463253
+"51710005903","Census Tract 59.03, Norfolk city, Virginia",7.19999980926512
+"51710006400","Census Tract 64, Norfolk city, Virginia",6.97628715319132
+"51710006603","Census Tract 66.03, Norfolk city, Virginia",7.18607834339818
+"51710006901","Census Tract 69.01, Norfolk city, Virginia",7.20153188325613
+"51710000201","Census Tract 2.01, Norfolk city, Virginia",7.11669314717658
+"51710000202","Census Tract 2.02, Norfolk city, Virginia",7.11265047648658
+"51710000300","Census Tract 3, Norfolk city, Virginia",7.09084425523073
+"51710000400","Census Tract 4, Norfolk city, Virginia",6.65597275172347
+"51710000500","Census Tract 5, Norfolk city, Virginia",7.09999990463239
+"51710000600","Census Tract 6, Norfolk city, Virginia",7.10833991148705
+"51710000800","Census Tract 8, Norfolk city, Virginia",7.01660688361586
+"51710000901","Census Tract 9.01, Norfolk city, Virginia",7.10474592342883
+"51710000902","Census Tract 9.02, Norfolk city, Virginia",6.96545590368304
+"51710001200","Census Tract 12, Norfolk city, Virginia",6.81245392368906
+"51710001300","Census Tract 13, Norfolk city, Virginia",6.93929896585443
+"51710001400","Census Tract 14, Norfolk city, Virginia",6.95324410369571
+"51710001600","Census Tract 16, Norfolk city, Virginia",6.90000587676975
+"51710001700","Census Tract 17, Norfolk city, Virginia",6.65061114014937
+"51710002000","Census Tract 20, Norfolk city, Virginia",6.99753688389186
+"51710002100","Census Tract 21, Norfolk city, Virginia",6.81487439694777
+"51710002200","Census Tract 22, Norfolk city, Virginia",6.60297309220999
+"51710002400","Census Tract 24, Norfolk city, Virginia",6.68803254049686
+"51710002500","Census Tract 25, Norfolk city, Virginia",7.14154692924666
+"51710002700","Census Tract 27, Norfolk city, Virginia",7.10862347949718
+"51710002800","Census Tract 28, Norfolk city, Virginia",6.79905223017041
+"51710002900","Census Tract 29, Norfolk city, Virginia",7.03561834140838
+"51710003000","Census Tract 30, Norfolk city, Virginia",6.94384532953912
+"51710003200","Census Tract 32, Norfolk city, Virginia",7.05959268993359
+"51710003300","Census Tract 33, Norfolk city, Virginia",7.09999990463254
+"51710003400","Census Tract 34, Norfolk city, Virginia",7.06852350201768
+"51710003600","Census Tract 36, Norfolk city, Virginia",7.09775297077861
+"51710004200","Census Tract 42, Norfolk city, Virginia",7.08401166846559
+"51710004300","Census Tract 43, Norfolk city, Virginia",7.09999990463256
+"51710004400","Census Tract 44, Norfolk city, Virginia",7.09999990463257
+"51710004500","Census Tract 45, Norfolk city, Virginia",7.0694975759589
+"51710004700","Census Tract 47, Norfolk city, Virginia",7.06818014479671
+"51710004800","Census Tract 48, Norfolk city, Virginia",7.04939459521862
+"51710004900","Census Tract 49, Norfolk city, Virginia",7.06987517383931
+"51710005000","Census Tract 50, Norfolk city, Virginia",7.05006270207358
+"51710005500","Census Tract 55, Norfolk city, Virginia",6.96389552582551
+"51710005601","Census Tract 56.01, Norfolk city, Virginia",7.11515381453702
+"51710005701","Census Tract 57.01, Norfolk city, Virginia",7.0747115745779
+"51710005702","Census Tract 57.02, Norfolk city, Virginia",7.09999990463246
+"51710005800","Census Tract 58, Norfolk city, Virginia",7.10000802917338
+"51710005901","Census Tract 59.01, Norfolk city, Virginia",7.1238108252034
+"51710005902","Census Tract 59.02, Norfolk city, Virginia",7.19625891585808
+"51710006000","Census Tract 60, Norfolk city, Virginia",7.11780546938857
+"51710006100","Census Tract 61, Norfolk city, Virginia",7.12685474643543
+"51710006200","Census Tract 62, Norfolk city, Virginia",7.19999980926514
+"51710006501","Census Tract 65.01, Norfolk city, Virginia",6.94156948771194
+"51710006502","Census Tract 65.02, Norfolk city, Virginia",7.26703493117802
+"51710006601","Census Tract 66.01, Norfolk city, Virginia",7.09999990463257
+"51710006602","Census Tract 66.02, Norfolk city, Virginia",7.12977391378152
+"51710006605","Census Tract 66.05, Norfolk city, Virginia",7.10080155763311
+"51710006606","Census Tract 66.06, Norfolk city, Virginia",7.06628974634868
+"51710006607","Census Tract 66.07, Norfolk city, Virginia",7.0837325309652
+"51710006800","Census Tract 68, Norfolk city, Virginia",7.20313938255492
+"51710006902","Census Tract 69.02, Norfolk city, Virginia",7.22240267590659
+"51710007001","Census Tract 70.01, Norfolk city, Virginia",7.19999980926514
+"51710007002","Census Tract 70.02, Norfolk city, Virginia",7.09640221575718
+"51710980100","Census Tract 9801, Norfolk city, Virginia",6.75426797043329
+"51710980300","Census Tract 9803, Norfolk city, Virginia",7.17470493112748
+"51710990000","Census Tract 9900, Norfolk city, Virginia",6.78473165298395
+"51710006604","Census Tract 66.04, Norfolk city, Virginia",7.24479906704278
+"51710003501","Census Tract 35.01, Norfolk city, Virginia",7.04982082761664
+"51710980200","Census Tract 9802, Norfolk city, Virginia",7.16340993174613
+"51740210500","Census Tract 2105, Portsmouth city, Virginia",7.19999955415474
+"51740211100","Census Tract 2111, Portsmouth city, Virginia",7.20610812398059
+"51740211800","Census Tract 2118, Portsmouth city, Virginia",7.25046904524762
+"51740212400","Census Tract 2124, Portsmouth city, Virginia",7.20335778664083
+"51740212801","Census Tract 2128.01, Portsmouth city, Virginia",7.12580659053733
+"51740213101","Census Tract 2131.01, Portsmouth city, Virginia",7.1928984978058
+"51740210200","Census Tract 2102, Portsmouth city, Virginia",6.90937081793605
+"51740210300","Census Tract 2103, Portsmouth city, Virginia",6.96269847733299
+"51740210400","Census Tract 2104, Portsmouth city, Virginia",6.74135495994595
+"51740210600","Census Tract 2106, Portsmouth city, Virginia",7.27187646131903
+"51740210900","Census Tract 2109, Portsmouth city, Virginia",7.05961456152291
+"51740211400","Census Tract 2114, Portsmouth city, Virginia",7.20041700772529
+"51740211500","Census Tract 2115, Portsmouth city, Virginia",7.14208454270677
+"51740211600","Census Tract 2116, Portsmouth city, Virginia",6.98128524850876
+"51740211700","Census Tract 2117, Portsmouth city, Virginia",7.03554172253932
+"51740211900","Census Tract 2119, Portsmouth city, Virginia",7.20551094729042
+"51740212000","Census Tract 2120, Portsmouth city, Virginia",7.19999980926518
+"51740212100","Census Tract 2121, Portsmouth city, Virginia",7.17191820068934
+"51740212300","Census Tract 2123, Portsmouth city, Virginia",7.29487989076322
+"51740212500","Census Tract 2125, Portsmouth city, Virginia",7.12928368007026
+"51740212600","Census Tract 2126, Portsmouth city, Virginia",7.03210758661931
+"51740212701","Census Tract 2127.01, Portsmouth city, Virginia",7.19321011155759
+"51740212702","Census Tract 2127.02, Portsmouth city, Virginia",7.27527126541169
+"51740212802","Census Tract 2128.02, Portsmouth city, Virginia",7.0921382389152
+"51740212900","Census Tract 2129, Portsmouth city, Virginia",6.77979869986846
+"51740213001","Census Tract 2130.01, Portsmouth city, Virginia",6.83552761540858
+"51740213002","Census Tract 2130.02, Portsmouth city, Virginia",6.80994933768055
+"51740213103","Census Tract 2131.03, Portsmouth city, Virginia",6.94641709120602
+"51740213104","Census Tract 2131.04, Portsmouth city, Virginia",7.05854036683704
+"51740213200","Census Tract 2132, Portsmouth city, Virginia",7.10262560794032
+"51740980100","Census Tract 9801, Portsmouth city, Virginia",7.21576663321354
+"51650010104","Census Tract 101.04, Hampton city, Virginia",7.10684153441052
+"51650010307","Census Tract 103.07, Hampton city, Virginia",7.0354847217741
+"51650010701","Census Tract 107.01, Hampton city, Virginia",6.99702949309547
+"51650010703","Census Tract 107.03, Hampton city, Virginia",7.09144699768275
+"51650010800","Census Tract 108, Hampton city, Virginia",7.2195970566134
+"51650010900","Census Tract 109, Hampton city, Virginia",7.11208045710171
+"51650011300","Census Tract 113, Hampton city, Virginia",6.98186361326815
+"51650990100","Census Tract 9901, Hampton city, Virginia",6.45695937368282
+"51650010103","Census Tract 101.03, Hampton city, Virginia",6.66138072801177
+"51650010200","Census Tract 102, Hampton city, Virginia",6.72568569428006
+"51650010304","Census Tract 103.04, Hampton city, Virginia",6.7273759758221
+"51650010306","Census Tract 103.06, Hampton city, Virginia",7.01617624519038
+"51650010309","Census Tract 103.09, Hampton city, Virginia",7.19999980926511
+"51650010310","Census Tract 103.10, Hampton city, Virginia",7.20658224996717
+"51650010311","Census Tract 103.11, Hampton city, Virginia",7.17816925943634
+"51650010312","Census Tract 103.12, Hampton city, Virginia",7.23760053360223
+"51650010314","Census Tract 103.14, Hampton city, Virginia",6.73896771360578
+"51650010400","Census Tract 104, Hampton city, Virginia",7.20005554686668
+"51650010501","Census Tract 105.01, Hampton city, Virginia",7.23151268028986
+"51650010502","Census Tract 105.02, Hampton city, Virginia",7.22199880342625
+"51650010601","Census Tract 106.01, Hampton city, Virginia",7.208049282191
+"51650010602","Census Tract 106.02, Hampton city, Virginia",7.19999980926514
+"51650010702","Census Tract 107.02, Hampton city, Virginia",7.14964106800153
+"51650011000","Census Tract 110, Hampton city, Virginia",6.93613173337184
+"51650011100","Census Tract 111, Hampton city, Virginia",6.69015593920808
+"51650011200","Census Tract 112, Hampton city, Virginia",6.74097117778437
+"51650011400","Census Tract 114, Hampton city, Virginia",7.16988457069311
+"51650011500","Census Tract 115, Hampton city, Virginia",6.95704019385606
+"51650011600","Census Tract 116, Hampton city, Virginia",7.07140217922691
+"51650011800","Census Tract 118, Hampton city, Virginia",7.16271197832973
+"51650012000","Census Tract 120, Hampton city, Virginia",7.15961749465132
+"51650012100","Census Tract 121, Hampton city, Virginia",6.51027620836283
+"51650010313","Census Tract 103.13, Hampton city, Virginia",7.09138433029637
+"51650011900","Census Tract 119, Hampton city, Virginia",7.24165839781157
+"51700030300","Census Tract 303, Newport News city, Virginia",7.15829500060151
+"51700030900","Census Tract 309, Newport News city, Virginia",7.30314021859577
+"51700031300","Census Tract 313, Newport News city, Virginia",7.28178506857829
+"51700031701","Census Tract 317.01, Newport News city, Virginia",7.01098395688202
+"51700032005","Census Tract 320.05, Newport News city, Virginia",6.67654596864797
+"51700032007","Census Tract 320.07, Newport News city, Virginia",6.92902433552818
+"51700032124","Census Tract 321.24, Newport News city, Virginia",6.84112230380196
+"51700032131","Census Tract 321.31, Newport News city, Virginia",6.63992667592601
+"51700032225","Census Tract 322.25, Newport News city, Virginia",7.12543067608209
+"51700030100","Census Tract 301, Newport News city, Virginia",7.34938422730169
+"51700030400","Census Tract 304, Newport News city, Virginia",7.44989152512856
+"51700030500","Census Tract 305, Newport News city, Virginia",7.36257642379037
+"51700030600","Census Tract 306, Newport News city, Virginia",7.39996036785877
+"51700030800","Census Tract 308, Newport News city, Virginia",7.37068458314142
+"51700031100","Census Tract 311, Newport News city, Virginia",6.93474488810026
+"51700031200","Census Tract 312, Newport News city, Virginia",7.1741802971249
+"51700031400","Census Tract 314, Newport News city, Virginia",7.19362310271583
+"51700031500","Census Tract 315, Newport News city, Virginia",6.94491467064565
+"51700031601","Census Tract 316.01, Newport News city, Virginia",6.98634737123127
+"51700031602","Census Tract 316.02, Newport News city, Virginia",7.14850454144711
+"51700031702","Census Tract 317.02, Newport News city, Virginia",7.25152310868766
+"51700031800","Census Tract 318, Newport News city, Virginia",6.71719506802775
+"51700031901","Census Tract 319.01, Newport News city, Virginia",6.8458021733252
+"51700031902","Census Tract 319.02, Newport News city, Virginia",6.97589483129099
+"51700032001","Census Tract 320.01, Newport News city, Virginia",6.7014569452456
+"51700032002","Census Tract 320.02, Newport News city, Virginia",6.80408616518966
+"51700032006","Census Tract 320.06, Newport News city, Virginia",7.28275010167687
+"51700032113","Census Tract 321.13, Newport News city, Virginia",6.87110125535375
+"51700032114","Census Tract 321.14, Newport News city, Virginia",7.08919195643114
+"51700032117","Census Tract 321.17, Newport News city, Virginia",7.0920446114764
+"51700032123","Census Tract 321.23, Newport News city, Virginia",6.88914029081025
+"51700032126","Census Tract 321.26, Newport News city, Virginia",7.2293651698549
+"51700032127","Census Tract 321.27, Newport News city, Virginia",7.38605205405404
+"51700032128","Census Tract 321.28, Newport News city, Virginia",7.28843130290728
+"51700032129","Census Tract 321.29, Newport News city, Virginia",7.28971086584403
+"51700032130","Census Tract 321.30, Newport News city, Virginia",7.1018278358039
+"51700032132","Census Tract 321.32, Newport News city, Virginia",6.92585032455164
+"51700032211","Census Tract 322.11, Newport News city, Virginia",6.9545311673372
+"51700032212","Census Tract 322.12, Newport News city, Virginia",7.23407988812555
+"51700032223","Census Tract 322.23, Newport News city, Virginia",7.14733004358628
+"51700032224","Census Tract 322.24, Newport News city, Virginia",7.31481718776927
+"51700032226","Census Tract 322.26, Newport News city, Virginia",7.09565309582662
+"51700032300","Census Tract 323, Newport News city, Virginia",6.74665088954137
+"51700032400","Census Tract 324, Newport News city, Virginia",6.48293971434007
+"51550020100","Census Tract 201, Chesapeake city, Virginia",7.29537389987033
+"51550020600","Census Tract 206, Chesapeake city, Virginia",7.36932161068821
+"51550020806","Census Tract 208.06, Chesapeake city, Virginia",7.45978342707638
+"51550020905","Census Tract 209.05, Chesapeake city, Virginia",7.43098102453631
+"51550021010","Census Tract 210.10, Chesapeake city, Virginia",6.45297568854457
+"51550021101","Census Tract 211.01, Chesapeake city, Virginia",6.48059254291791
+"51550021402","Census Tract 214.02, Chesapeake city, Virginia",7.02666457003688
+"51550021602","Census Tract 216.02, Chesapeake city, Virginia",6.9900428364994
+"51550020001","Census Tract 200.01, Chesapeake city, Virginia",6.8426978040729
+"51550020002","Census Tract 200.02, Chesapeake city, Virginia",7.11889911119991
+"51550020003","Census Tract 200.03, Chesapeake city, Virginia",7.29158456791847
+"51550020200","Census Tract 202, Chesapeake city, Virginia",7.23782932186665
+"51550020300","Census Tract 203, Chesapeake city, Virginia",7.15521804030932
+"51550020400","Census Tract 204, Chesapeake city, Virginia",7.22245121851176
+"51550020500","Census Tract 205, Chesapeake city, Virginia",7.34817828428448
+"51550020700","Census Tract 207, Chesapeake city, Virginia",7.41353687222399
+"51550020804","Census Tract 208.04, Chesapeake city, Virginia",6.56535426197236
+"51550020805","Census Tract 208.05, Chesapeake city, Virginia",7.47210657362421
+"51550020807","Census Tract 208.07, Chesapeake city, Virginia",7.3980774733403
+"51550020808","Census Tract 208.08, Chesapeake city, Virginia",7.36224182926636
+"51550020809","Census Tract 208.09, Chesapeake city, Virginia",7.42181207286616
+"51550020903","Census Tract 209.03, Chesapeake city, Virginia",7.32876023381271
+"51550020904","Census Tract 209.04, Chesapeake city, Virginia",6.86936322258495
+"51550020906","Census Tract 209.06, Chesapeake city, Virginia",7.21146201735625
+"51550021004","Census Tract 210.04, Chesapeake city, Virginia",6.07335660416396
+"51550021005","Census Tract 210.05, Chesapeake city, Virginia",6.80364197950086
+"51550021006","Census Tract 210.06, Chesapeake city, Virginia",6.01285575672363
+"51550021009","Census Tract 210.09, Chesapeake city, Virginia",6.15842369255426
+"51550021011","Census Tract 210.11, Chesapeake city, Virginia",6.36093152750085
+"51550021012","Census Tract 210.12, Chesapeake city, Virginia",6.40652449488035
+"51550021013","Census Tract 210.13, Chesapeake city, Virginia",6.40612636338193
+"51550021102","Census Tract 211.02, Chesapeake city, Virginia",6.0792677742673
+"51550021200","Census Tract 212, Chesapeake city, Virginia",5.96984558349518
+"51550021301","Census Tract 213.01, Chesapeake city, Virginia",5.98485218714398
+"51550021302","Census Tract 213.02, Chesapeake city, Virginia",6.30098667612339
+"51550021401","Census Tract 214.01, Chesapeake city, Virginia",6.87260660878602
+"51550021403","Census Tract 214.03, Chesapeake city, Virginia",7.34248441300663
+"51550021404","Census Tract 214.04, Chesapeake city, Virginia",7.10675214253525
+"51550021501","Census Tract 215.01, Chesapeake city, Virginia",6.31090120869337
+"51550021502","Census Tract 215.02, Chesapeake city, Virginia",6.64061495638151
+"51550021601","Census Tract 216.01, Chesapeake city, Virginia",7.01787003808571
+"51810040403","Census Tract 404.03, Virginia Beach city, Virginia",6.90298683278928
+"51810041002","Census Tract 410.02, Virginia Beach city, Virginia",7.17994810944927
+"51810041600","Census Tract 416, Virginia Beach city, Virginia",6.64401029300458
+"51810042400","Census Tract 424, Virginia Beach city, Virginia",7.15540651585477
+"51810043003","Census Tract 430.03, Virginia Beach city, Virginia",6.82966824392853
+"51810043600","Census Tract 436, Virginia Beach city, Virginia",6.86513402679072
+"51810044401","Census Tract 444.01, Virginia Beach city, Virginia",6.74892993151064
+"51810044808","Census Tract 448.08, Virginia Beach city, Virginia",7.01265624220842
+"51810045405","Census Tract 454.05, Virginia Beach city, Virginia",7.19395004140486
+"51810045422","Census Tract 454.22, Virginia Beach city, Virginia",6.61953561856272
+"51810045425","Census Tract 454.25, Virginia Beach city, Virginia",6.90749403637077
+"51810045603","Census Tract 456.03, Virginia Beach city, Virginia",7.19940995401825
+"51810045805","Census Tract 458.05, Virginia Beach city, Virginia",7.3000001907347
+"51810045807","Census Tract 458.07, Virginia Beach city, Virginia",7.19999980926514
+"51810045808","Census Tract 458.08, Virginia Beach city, Virginia",7.19999980926514
+"51810045809","Census Tract 458.09, Virginia Beach city, Virginia",7.19999980926514
+"51810045810","Census Tract 458.10, Virginia Beach city, Virginia",7.13869229270058
+"51810046002","Census Tract 460.02, Virginia Beach city, Virginia",7.31969637826706
+"51810046005","Census Tract 460.05, Virginia Beach city, Virginia",7.22225098204544
+"51810046010","Census Tract 460.10, Virginia Beach city, Virginia",7.29393311567441
+"51810046012","Census Tract 460.12, Virginia Beach city, Virginia",7.1966372320555
+"51810046206","Census Tract 462.06, Virginia Beach city, Virginia",7.38650843201488
+"51810046214","Census Tract 462.14, Virginia Beach city, Virginia",7.25343948191616
+"51810046219","Census Tract 462.19, Virginia Beach city, Virginia",7.4687665225959
+"51810046224","Census Tract 462.24, Virginia Beach city, Virginia",7.33911065229361
+"51810045414","Census Tract 454.14, Virginia Beach city, Virginia",7.20047090637925
+"51810040000","Census Tract 400, Virginia Beach city, Virginia",7.24105742182255
+"51810040200","Census Tract 402, Virginia Beach city, Virginia",7.20620653373184
+"51810040402","Census Tract 404.02, Virginia Beach city, Virginia",7.19691577708411
+"51810040404","Census Tract 404.04, Virginia Beach city, Virginia",6.91307266004438
+"51810040600","Census Tract 406, Virginia Beach city, Virginia",7.22057325617345
+"51810040801","Census Tract 408.01, Virginia Beach city, Virginia",7.17056213107143
+"51810040802","Census Tract 408.02, Virginia Beach city, Virginia",7.19999442154987
+"51810041003","Census Tract 410.03, Virginia Beach city, Virginia",7.17207966887605
+"51810041004","Census Tract 410.04, Virginia Beach city, Virginia",7.164965614471
+"51810041200","Census Tract 412, Virginia Beach city, Virginia",6.85388776474422
+"51810041400","Census Tract 414, Virginia Beach city, Virginia",6.74849100050322
+"51810041801","Census Tract 418.01, Virginia Beach city, Virginia",7.05605025727138
+"51810041802","Census Tract 418.02, Virginia Beach city, Virginia",6.75788091792424
+"51810042000","Census Tract 420, Virginia Beach city, Virginia",6.47898944686034
+"51810042201","Census Tract 422.01, Virginia Beach city, Virginia",6.82354906693072
+"51810042202","Census Tract 422.02, Virginia Beach city, Virginia",6.98957168713385
+"51810042600","Census Tract 426, Virginia Beach city, Virginia",7.09460058298106
+"51810042801","Census Tract 428.01, Virginia Beach city, Virginia",7.25988537020575
+"51810042802","Census Tract 428.02, Virginia Beach city, Virginia",7.25437012785763
+"51810043002","Census Tract 430.02, Virginia Beach city, Virginia",6.71734889373783
+"51810043004","Census Tract 430.04, Virginia Beach city, Virginia",6.66576042573677
+"51810043200","Census Tract 432, Virginia Beach city, Virginia",6.72171113522575
+"51810043400","Census Tract 434, Virginia Beach city, Virginia",6.97281810047179
+"51810043800","Census Tract 438, Virginia Beach city, Virginia",6.78977897623397
+"51810044001","Census Tract 440.01, Virginia Beach city, Virginia",7.2245980330312
+"51810044003","Census Tract 440.03, Virginia Beach city, Virginia",7.05267341476175
+"51810044004","Census Tract 440.04, Virginia Beach city, Virginia",7.03671841833969
+"51810044200","Census Tract 442, Virginia Beach city, Virginia",6.82760239644199
+"51810044402","Census Tract 444.02, Virginia Beach city, Virginia",7.08097012831105
+"51810044600","Census Tract 446, Virginia Beach city, Virginia",6.66877893364646
+"51810044805","Census Tract 448.05, Virginia Beach city, Virginia",7.0260726086651
+"51810044806","Census Tract 448.06, Virginia Beach city, Virginia",6.94533642641558
+"51810044807","Census Tract 448.07, Virginia Beach city, Virginia",7.09099679101949
+"51810045000","Census Tract 450, Virginia Beach city, Virginia",6.52008973640492
+"51810045200","Census Tract 452, Virginia Beach city, Virginia",6.77835903785522
+"51810045406","Census Tract 454.06, Virginia Beach city, Virginia",7.08688509553927
+"51810045407","Census Tract 454.07, Virginia Beach city, Virginia",6.94742909353029
+"51810045408","Census Tract 454.08, Virginia Beach city, Virginia",6.54961672456277
+"51810045412","Census Tract 454.12, Virginia Beach city, Virginia",6.52941499736201
+"51810045415","Census Tract 454.15, Virginia Beach city, Virginia",7.20513952600036
+"51810045417","Census Tract 454.17, Virginia Beach city, Virginia",6.38705083899715
+"51810045420","Census Tract 454.20, Virginia Beach city, Virginia",6.42502291416694
+"51810045421","Census Tract 454.21, Virginia Beach city, Virginia",6.40176317956588
+"51810045423","Census Tract 454.23, Virginia Beach city, Virginia",6.32552573969623
+"51810045424","Census Tract 454.24, Virginia Beach city, Virginia",6.29294017187715
+"51810045426","Census Tract 454.26, Virginia Beach city, Virginia",6.82566480625468
+"51810045427","Census Tract 454.27, Virginia Beach city, Virginia",6.97583558805401
+"51810045428","Census Tract 454.28, Virginia Beach city, Virginia",6.71392170601326
+"51810045601","Census Tract 456.01, Virginia Beach city, Virginia",6.91849612049593
+"51810045604","Census Tract 456.04, Virginia Beach city, Virginia",7.16901109626262
+"51810045801","Census Tract 458.01, Virginia Beach city, Virginia",7.19510211020991
+"51810045803","Census Tract 458.03, Virginia Beach city, Virginia",7.21183250891674
+"51810045806","Census Tract 458.06, Virginia Beach city, Virginia",7.24289837084825
+"51810046006","Census Tract 460.06, Virginia Beach city, Virginia",7.29193623264213
+"51810046009","Census Tract 460.09, Virginia Beach city, Virginia",7.27426696696306
+"51810046011","Census Tract 460.11, Virginia Beach city, Virginia",7.19999980926534
+"51810046013","Census Tract 460.13, Virginia Beach city, Virginia",7.15649227688045
+"51810046014","Census Tract 460.14, Virginia Beach city, Virginia",7.19999980926513
+"51810046015","Census Tract 460.15, Virginia Beach city, Virginia",6.90773717892632
+"51810046016","Census Tract 460.16, Virginia Beach city, Virginia",6.5145770708433
+"51810046204","Census Tract 462.04, Virginia Beach city, Virginia",7.17211259379545
+"51810046207","Census Tract 462.07, Virginia Beach city, Virginia",7.40381081646541
+"51810046211","Census Tract 462.11, Virginia Beach city, Virginia",7.38586920423309
+"51810046212","Census Tract 462.12, Virginia Beach city, Virginia",7.29445108618589
+"51810046213","Census Tract 462.13, Virginia Beach city, Virginia",7.40527377765364
+"51810046216","Census Tract 462.16, Virginia Beach city, Virginia",7.12533445388947
+"51810046217","Census Tract 462.17, Virginia Beach city, Virginia",6.95669709359283
+"51810046220","Census Tract 462.20, Virginia Beach city, Virginia",7.39047600674621
+"51810046221","Census Tract 462.21, Virginia Beach city, Virginia",7.37421171355295
+"51810046222","Census Tract 462.22, Virginia Beach city, Virginia",7.43697874247693
+"51810046223","Census Tract 462.23, Virginia Beach city, Virginia",7.49369802317398
+"51810046225","Census Tract 462.25, Virginia Beach city, Virginia",7.27477850292436
+"51810046400","Census Tract 464, Virginia Beach city, Virginia",6.35566412420386
+"51810990100","Census Tract 9901, Virginia Beach city, Virginia",6.68927883369496
