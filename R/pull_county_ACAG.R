@@ -254,7 +254,7 @@ pull_county_ACAG <- function(year, county_state = c()){
       
       #NEED TO ADJUST SO IT DOES SAME STATES IN SAME GO
       #dflist <- mclapply(county_state, get_county_geo)
-      dflist <- mclapply(unique(state), get_county_geo, county_df)
+      dflist <- lapply(unique(state), get_county_geo, county_df)
       ACAG_pm_dat_County <- bind_rows(dflist)
       return(ACAG_pm_dat_County)
     }
