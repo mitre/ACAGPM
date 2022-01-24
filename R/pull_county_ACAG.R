@@ -23,7 +23,7 @@ save_data <- function(df, state){
     pm_data <- as.data.frame(pm_data)
       
     pm_data <-
-      if (st != "DC") {
+      if (state != "DC") {
         pm_data %>%
           dplyr::select(GEOID, NAMELSAD, Particulate.Matter)
       } else {
