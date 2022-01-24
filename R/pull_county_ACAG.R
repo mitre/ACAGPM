@@ -182,7 +182,7 @@ get_county_geo <- function(st, cty_df) {
   paste0(paste0("Saving ", st, "..."))
   #save_data(df = final_geo.df, state = st)
   #return(final_geo.df)
-  return(pm_data)
+  return(save_data(df = final_geo.df, state = st))
 }
 
 ## EXTERNAL
