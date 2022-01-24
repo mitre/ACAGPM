@@ -270,7 +270,8 @@ get_city_geo <- function(city_name) {
   this_city <- names(final_geo.df)[1]
   pm_data <- final_geo.df[[this_city]]
   pm_data <- as.data.frame(pm_data) %>%
-    dplyr::select(GEOID, NAME, Particulate.Matter)
+    dplyr::select(GEOID, NAME, Particulate.Matter) %>%
+    add_column(city_state = rep(city_name, nrow(pm_data)), .before = "GEOID")
   
   return(pm_data)
 
@@ -289,7 +290,7 @@ get_city_geo <- function(city_name) {
 #'@param city_state, list containing desired cities in format "city_st"
 #'
 #'@return dataframe containing PM2.5 for tracts in each city, or PM2.5 tracts for all cities ((NOT AVAILABLE))
-pull_city_ACAG <- function(year, city_state){
+pull_city_ACAG <- function(year, city_state = c()){
   
   available_years <- c(2015, 2016, 2017, 2018)
   cities <- read.csv(file.path("data", "input", "all_cities.csv")) %>%
@@ -316,8 +317,12 @@ pull_city_ACAG <- function(year, city_state){
       
       return(ACAG_pm_dat_City)
     }
+    else if (length(city_state) == 0){
+      #pull condensed
+    }
     else{
       ###THROW EXCEPTION
+      stop("Improper input, unrecognized city")
     }
   }
   
@@ -339,8 +344,12 @@ pull_city_ACAG <- function(year, city_state){
       ACAG_pm_dat_City <- bind_rows(dflist)
       return(ACAG_pm_dat_City)
     }
+    else if (length(city_state) == 0){
+      #pull condensed
+    }
     else{
       ###THROW EXCEPTION
+      stop("Improper input, unrecognized city")
     }
   }
   

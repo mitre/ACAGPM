@@ -37,6 +37,40 @@ get_pm_data <- function(state){
 }
 
 
+#' Helper function to compute PM2.5 concentrations for every census tract for each
+#' state
+#'
+#' @keywords internal
+#' @noRd
+get_national_geo <- function(){
+  geo <- tigris::states(cb = T) %>%
+    # mutate(INTPTLAT = as.numeric(INTPTLAT),
+    #        INTPTLON = as.numeric(INTPTLON)) %>%
+    filter(STUSPS %in% states)
+  
+  # CRS needs to line up
+  new_dalhousie <<- projectRaster(dalhousie, crs = crs(geo))
+  new_dalhousie@data@names <- "Value"
+  
+  # Initialize particulate matter column
+  new_geo <- geo %>%
+    mutate(Particulate.Matter = NA_real_)
+  
+  # Convert df to a list to be able to parallelize in mclapply
+  new_geo.list <-
+    setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
+  
+  # Perform parallel computation
+  new_geo.list_PM <- mclapply(new_geo.list, get_pm_data)
+  pm_data <- new_geo.list_PM %>% bind_rows() # Back to df
+  
+  pm_data <- as.data.frame(pm_data) %>%
+    dplyr::select(GEOID, NAME, Particulate.Matter)
+  
+  return(pm_data)
+}
+
+
 ## EXTERNAL
 
 #' Pulls PM data at national level, either internally or externally
@@ -51,6 +85,8 @@ get_pm_data <- function(state){
 pull_national_ACAG <- function(year){
   
   available_years <- c(2015, 2016, 2017, 2018)
+  # Does not include Alaska or Hawaii!
+  states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
   
   file_path <- file.path("data", "output", year, "National", "Dalhousie_pm_dat_US.csv")
 
@@ -68,40 +104,11 @@ pull_national_ACAG <- function(year){
       ))
     dalhousie@data@names <- "Value"
     
-    # Does not include Alaska or Hawaii!
-    states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
+    Dalhousie_pm_dat_US <- get_national_geo()
     
-    Dalhousie_pm_dat_US <- "temp_df"
-    
-    geo <- tigris::states(cb = T) %>%
-      # mutate(INTPTLAT = as.numeric(INTPTLAT),
-      #        INTPTLON = as.numeric(INTPTLON)) %>%
-      filter(STUSPS %in% states)
-    
-    # CRS needs to line up
-    new_dalhousie <- projectRaster(dalhousie, crs = crs(geo))
-    new_dalhousie@data@names <- "Value"
-    
-    # Initialize particulate matter column
-    new_geo <- geo %>%
-      mutate(Particulate.Matter = NA_real_)
-    
-    # Convert df to a list to be able to parallelize in mclapply
-    new_geo.list <-
-      setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
-    
-    # Perform parallel computation
-    new_geo.list_PM <- mclapply(new_geo.list, get_pm_data)
-    pm_data <- new_geo.list_PM %>% bind_rows() # Back to df
-    
-    pm_data <- as.data.frame(pm_data) %>%
-      dplyr::select(GEOID, NAME, Particulate.Matter)
-    
-    #return(pm_data)
     return(Dalhousie_pm_dat_US)
   }
   
-  #return(Dalhousie_pm_dat_US)
 }
 
 
