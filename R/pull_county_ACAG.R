@@ -58,12 +58,12 @@ save_data <- function(df, state){
 #' census tract
 #' @param census data frame - single census tract with geometry
 #' @return data frame with mean weight PM2.5 estimates propagated for that CT
-get_census_pm <- function(census) {
+get_census_pm <- function(census, new_dal) {
   
   # Crop dalhousie data to match census tract boundary
   new_geo_sp <- as(census, "Spatial")
   dalhousie_crop <-
-    crop(new_dalhousie, new_geo_sp, snap = "out")
+    crop(new_dal, new_geo_sp, snap = "out")
   dalhousie_df <- as.data.frame(dalhousie_crop, xy = T)
   # Plot in base dalhousie
   # plot(dalhousie_crop)
@@ -101,7 +101,7 @@ get_census_pm <- function(census) {
 #' @param cty_row data frame - single county with geometry
 #' @param st string - state that county resides in
 #' @return data frame of tract level data for county and state with empty PM column
-get_census_geo <- function(cty_row, st) {
+get_census_geo <- function(cty_row, st, dal) {
   cty <- cty_row$COUNTYFP
   
   # Get specific county shape info
@@ -110,15 +110,15 @@ get_census_geo <- function(cty_row, st) {
            INTPTLON = as.numeric(INTPTLON))
   
   # Make sure that CRS projections match
-  new_dalhousie <<-
+  new_dal <-
     #if (st == states[1] & cty == county_geo$COUNTYFP[1]) {
-      projectRaster(dalhousie, crs = crs(county_geo))
+      projectRaster(dal, crs = crs(county_geo))
     #} else {
     #  new_dalhousie
     #}
   
   # Make sure name of data didn't change
-  new_dalhousie@data@names <- "Value"
+  new_dal@data@names <- "Value"
   
   # Initialize particulate matter column
   new_geo <- county_geo %>%
@@ -126,14 +126,15 @@ get_census_geo <- function(cty_row, st) {
     filter(AWATER / as.numeric(st_area(geometry)) < .9) # Remove tracts that are over 90
   
   
-  return(new_geo)
+  return(list("new_geo" = new_geo, "new_dal" = new_dal))
 }
+
 
 #' Helper function to compute PM2.5 concentrations for every census tract for each
 #' county in this state
 #' @param st string - state
 #' @param cty_df dataframe
-get_county_geo <- function(st, cty_df) {
+get_county_geo <- function(st, cty_df, dal) {
   # Get Counties in state, filter to cty_df only in state
   cty_df.st <- cty_df %>%
     filter(state == st)
@@ -162,7 +163,13 @@ get_county_geo <- function(st, cty_df) {
   
   # Get census shape info
   print("Fetching census shape data for counties...")
-  new_geo <- lapply(cty_row.list, get_census_geo, st = st)
+  new_vars <- lapply(cty_row.list, get_census_geo, st = st, dal = dal)
+  
+  new_dal <- new_vars[[1]]$new_dal
+  
+  new_geo <- lapply(new_vars, function(x){
+    return(x$new_geo)
+  })
   
   # Assign rownames
   new_geo.list <- lapply(new_geo, function(df){
@@ -172,7 +179,7 @@ get_county_geo <- function(st, cty_df) {
   # Compute mean area concentration for CTs
   print("Computing mean area weighted PM2.5...")
   final_geo <- lapply(new_geo.list, function(df){
-    lapply(df, get_census_pm)
+    lapply(df, get_census_pm, new_dal)
   })
   
   # Combine into single df
@@ -201,6 +208,8 @@ pull_county_ACAG <- function(year, county_state = c()){
   us_cities <- read.csv(file.path("data", "input", "US_cities.csv")) #USE THIS LIST TO CONFIRM EXISTENCE
   # specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
+  every_county <- read.csv(file.path("data", "input", "all_counties.csv")) %>%
+    mutate(county_state = paste0(County, "_", State))
   
   state <- sapply(county_state, function(x){
     unlist(strsplit(x, split = "_"))[2]
@@ -219,7 +228,7 @@ pull_county_ACAG <- function(year, county_state = c()){
   
   if (year %in% available_years){
     #if (all(state %in% states)){ #check to see if there is a list of counties
-    if (TRUE){
+    if (all(county_state %in% every_county$county_state)){
       dflist <- lapply(county_state, function(x){
         tempdf <- read.csv(file.path("data", "output", year, "County", paste0("Dalhousie_pm_dat_", x, ".csv"))) 
         tempdf <- tempdf %>%
@@ -241,8 +250,7 @@ pull_county_ACAG <- function(year, county_state = c()){
   }
   
   else{
-    #if (all(state %in% states)){ #check to see if there is a list of counties
-    if (TRUE){
+    if (all(county_state %in% every_county$county_state)){
       dalhousie <- raster(
         file.path(
           "data",
@@ -254,7 +262,7 @@ pull_county_ACAG <- function(year, county_state = c()){
       
       #NEED TO ADJUST SO IT DOES SAME STATES IN SAME GO
       #dflist <- mclapply(county_state, get_county_geo)
-      dflist <- lapply(unique(state), get_county_geo, county_df)
+      dflist <- lapply(unique(state), get_county_geo, county_df, dalhousie)
       ACAG_pm_dat_County <- bind_rows(dflist)
       return(ACAG_pm_dat_County)
     }

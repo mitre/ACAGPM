@@ -5,7 +5,7 @@
 \title{Pulls PM data at city level, either internally or externally.
 If city_state list is empty, returns condensed city list.}
 \usage{
-pull_city_ACAG(year, city_state)
+pull_city_ACAG(year, city_state = c())
 }
 \arguments{
 \item{city_state, }{list containing desired cities in format "city_st"}
