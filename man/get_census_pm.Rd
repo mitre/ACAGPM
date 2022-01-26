@@ -5,7 +5,7 @@
 \title{Helper function to compute mean area weighted PM2.5 concentration for a given
 census tract}
 \usage{
-get_census_pm(census)
+get_census_pm(census, new_dal)
 }
 \arguments{
 \item{census}{data frame - single census tract with geometry}

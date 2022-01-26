@@ -5,7 +5,7 @@
 \title{Helper function to grab and transform all census tracts within a given county
 and initialize particulate matter column to be passed to get_census_pm}
 \usage{
-get_census_geo(cty_row, st)
+get_census_geo(cty_row, st, dal)
 }
 \arguments{
 \item{cty_row}{data frame - single county with geometry}

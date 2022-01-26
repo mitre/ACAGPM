@@ -5,7 +5,7 @@
 \title{Helper function to compute PM2.5 concentrations for every census tract for each
 county in this state}
 \usage{
-get_county_geo(st, cty_df)
+get_county_geo(st, cty_df, dal)
 }
 \arguments{
 \item{st}{string - state}

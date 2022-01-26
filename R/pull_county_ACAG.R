@@ -64,7 +64,7 @@ get_census_pm <- function(census, new_dal) {
   new_geo_sp <- as(census, "Spatial")
   dalhousie_crop <-
     crop(new_dal, new_geo_sp, snap = "out")
-  dalhousie_df <- as.data.frame(dalhousie_crop, xy = T)
+  dalhousie_df <- data.frame(rasterToPoints(dalhousie_crop))
   # Plot in base dalhousie
   # plot(dalhousie_crop)
   # plot(new_geo_sp, add = T)
