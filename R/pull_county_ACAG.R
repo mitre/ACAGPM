@@ -101,7 +101,7 @@ get_census_pm <- function(census, new_dal) {
 #' @param cty_row data frame - single county with geometry
 #' @param st string - state that county resides in
 #' @return data frame of tract level data for county and state with empty PM column
-get_census_geo <- function(cty_row, st, dal) {
+get_census_geo <- function(cty_row, st, dal, cty_df.st) {
   cty <- cty_row$COUNTYFP
   
   # Get specific county shape info
@@ -109,16 +109,24 @@ get_census_geo <- function(cty_row, st, dal) {
     mutate(INTPTLAT = as.numeric(INTPTLAT),
            INTPTLON = as.numeric(INTPTLON))
   
+  name_col <- if (st != "DC") {
+    "NAMELSAD"
+  } else {
+    "NAME"
+  }
+  
   # Make sure that CRS projections match
   new_dal <-
-    #if (st == states[1] & cty == county_geo$COUNTYFP[1]) {
+    if (cty_row[[name_col]] == cty_df.st$county[1]) {
       projectRaster(dal, crs = crs(county_geo))
-    #} else {
-    #  new_dalhousie
-    #}
+    } else {
+      NULL
+    }
   
   # Make sure name of data didn't change
-  new_dal@data@names <- "Value"
+  if (!is.null(new_dal)){
+    new_dal@data@names <- "Value"
+  }
   
   # Initialize particulate matter column
   new_geo <- county_geo %>%
@@ -163,7 +171,7 @@ get_county_geo <- function(st, cty_df, dal) {
   
   # Get census shape info
   print("Fetching census shape data for counties...")
-  new_vars <- lapply(cty_row.list, get_census_geo, st = st, dal = dal)
+  new_vars <- lapply(cty_row.list, get_census_geo, st = st, dal = dal, cty_df.st = cty_df.st)
   
   new_dal <- new_vars[[1]]$new_dal
   
@@ -209,17 +217,23 @@ pull_county_ACAG <- function(year, county_state = c()){
   # specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
   every_county <- read.csv(file.path("data", "input", "all_counties.csv")) %>%
-    mutate(county_state = paste0(County, "_", State))
+    mutate(county_state = paste0(county, "_", state)) %>%
+    filter(state == "AL")
+
+  if (length(county_state) == 0){
+    county_state <- every_county$county_state
+  }
   
   state <- sapply(county_state, function(x){
     unlist(strsplit(x, split = "_"))[2]
   })
-  
+    
   county <- sapply(county_state, function(x){
     unlist(strsplit(x, split = "_"))[1]
   })
+    
+  county_df <- cbind.data.frame(county, state, county_state)
   
-  county_df <- cbind.data.frame(county_state, county, state)
   
   ACAG_pm_dat_County <- data.frame(county_state = character(),
                                   GEOID = numeric(),
@@ -242,6 +256,7 @@ pull_county_ACAG <- function(year, county_state = c()){
     }
     else if (length(county_state) == 0){
       #pull condensed
+      stop("Got here, not good")
     }
     else{
       ###THROW EXCEPTION
@@ -268,6 +283,7 @@ pull_county_ACAG <- function(year, county_state = c()){
     }
     else if (length(county_state) == 0){
       #pull condensed
+      stop("Got here, not good")
     }
     else{
       ###THROW EXCEPTION
