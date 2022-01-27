@@ -5,12 +5,12 @@
 #' @param census data frame - single county with geometry
 #' @keywords internal
 #' @noRd
-get_county_pm <- function(census){
+get_county_pm <- function(census, new_dal){
   print(paste0("Calculating PM2.5 for ", census$NAME, ", ", Sys.time(), "..."))
   tic(census$NAME)
   
   new_geo_sp <- as(census, "Spatial")
-  dalhousie_crop <- crop(new_dalhousie, new_geo_sp, snap = "out")
+  dalhousie_crop <- crop(new_dal, new_geo_sp, snap = "out")
   dalhousie_df <- as.data.frame(dalhousie_crop, xy = T)
   # Plot in base dalhousie
   # plot(dalhousie_crop)
@@ -54,7 +54,7 @@ get_county_pm <- function(census){
 #' @param state - single state
 #' @keywords internal
 #' @noRd
-get_state_geo <- function(st){
+get_state_geo <- function(st, ct_df, dal){
   geo <- 
     if (st != "DC") {
       tigris::counties(st) %>%
@@ -65,9 +65,9 @@ get_state_geo <- function(st){
     }
   
   #RETURN TO THIS; IT'S BECAUSE OF THE WAY THINGS ARE PULLED
-  new_dalhousie <<- #if (st == states[1]){
-    projectRaster(dalhousie, crs = crs(geo))
-  #}else { new_dalhousie }
+  new_dal <- #if (st == ct_df[1]){
+    projectRaster(dal, crs = crs(geo))
+  #}else { new_dal }
   
   new_dalhousie@data@names <- "Value"
   
@@ -77,7 +77,7 @@ get_state_geo <- function(st){
     setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
   
   #new_geo.list_PM <- mclapply(new_geo.list, get_county_pm, mc.cores = detectCores())
-  new_geo.list_PM <- mclapply(new_geo.list, get_county_pm, mc.cores = 1)
+  new_geo.list_PM <- mclapply(new_geo.list, get_county_pm, new_dal = new_dal, mc.cores = 1)
   pm_data <- do.call("rbind", new_geo.list_PM)
   
   pm_data <- as.data.frame(pm_data)
@@ -110,6 +110,12 @@ pull_state_ACAG <- function(year, state = c()){
   # specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
   
+  if (length(state) == 0){
+    state = states
+  }
+  
+  state_df = as.data.frame(state)
+  
   ACAG_pm_dat_State <- data.frame(state = character(),
                                  GEOID = numeric(),
                                  NAME = character(),
@@ -129,9 +135,6 @@ pull_state_ACAG <- function(year, state = c()){
       
       return(ACAG_pm_dat_State)
     }
-    else if (length(state) == 0){
-      #pull condensed
-    }
     else{
       ###THROW EXCEPTION
       stop("Improper input, unrecognized state")
@@ -150,12 +153,9 @@ pull_state_ACAG <- function(year, state = c()){
       dalhousie@data@names <- "Value"
       
       #NEED TO ADJUST SO IT DOES SAME STATES IN SAME GO
-      dflist <- lapply(state, get_state_geo)
+      dflist <- lapply(state, get_state_geo, city_df, dalhousie)
       ACAG_pm_dat_State <- bind_rows(dflist)
       return(ACAG_pm_dat_State)
-    }
-    else if (length(state) == 0){
-      #pull condensed
     }
     else{
       ###THROW EXCEPTION

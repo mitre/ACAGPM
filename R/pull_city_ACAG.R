@@ -109,6 +109,9 @@ get_census_shape <- function(level, st = NULL, county = NULL, city = NULL){
 #' @keywords internal
 #' @noRd
 get_city_county <- function(city,st){
+  us_cities <- read.csv(file.path("data", "input", "US_cities.csv"))
+  specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
+  
   if (city %in% specific_us_cities$place.name){
     ct_codes <- unique(
       specific_us_cities$county.code[
@@ -164,8 +167,8 @@ save_data <- function(df, state){
 #' @param census data frame - single census tract with geometry
 #' @keywords internal
 #' @noRd
-get_census_pm <- function(census) {
-  dalhousie_crop <- crop(new_dalhousie, census, snap = "out")
+get_census_pm <- function(census, new_dal) {
+  dalhousie_crop <- crop(new_dal, census, snap = "out")
   dalhousie_df <- as.data.frame(dalhousie_crop, xy = T)
   # Replace tracts that are all NA with 0.0
   if (all(is.na(dalhousie_df$Value))){
@@ -204,22 +207,20 @@ get_census_pm <- function(census) {
 #' @param st string - state that city resides in
 #' @keywords internal
 #' @noRd
-get_census_geo <- function(this_city, st) {
+get_census_geo <- function(this_city, st, city_df) {
   # Need the city boundaries
-  city_shp <- get_census_shape("city", st = st, city = this_city)
+  new_geo <- get_census_shape("city", st = st, city = this_city)
   
   # Make sure that CRS projections match
-  new_dalhousie <<- if ( projection_count == 1){
-    # if (st == unique(cities$state)[1]){
-    projectRaster(dalhousie, crs = crs(city_shp))
-  }else { new_dalhousie }
+  new_dal <- #if (this_city == city_df$city[1]){
+    projectRaster(dalhousie, crs = crs(new_geo))
+  #}else { NULL }
   
   # Make sure name of data didn't change
   new_dalhousie@data@names <- "Value"
   
-  projection_count <<- projection_count + 1
-  
-  return(city_shp)
+  #return(city_shp)
+  return(list("new_geo" = new_geo, "new_dal" = new_dal))
 }
 
 
@@ -229,22 +230,25 @@ get_census_geo <- function(this_city, st) {
 #' @keywords internal
 #' @noRd
 #get_city_geo <- function(st) {
-get_city_geo <- function(city_name) {
+get_city_geo <- function(city_name, city_df, dal) {
   
-  st <- cities %>%
+  st <- city_df %>%
     filter(city_state == city_name) %>%
     pull(state)
   
-  # these_cities <- cities %>%
-  #   filter(state == st) %>%
-  #   pull(city)
-  these_cities <- cities %>%
+  these_cities <- city_df %>%
     filter(city_state == city_name) %>%
     pull(city)
   
   print("Fetching census shape data for counties...")
-  new_geo <- lapply(these_cities, function(this_city){
-    get_census_geo(this_city, st = st)
+  new_vars <- lapply(these_cities, function(this_city){
+    get_census_geo(this_city, st = st, city_df = city_df, dal = dal)
+  })
+  
+  new_dal <- new_vars[[1]]$new_dal
+  
+  new_geo <- lapply(new_vars, function(x){
+    return(x$new_geo)
   })
   
   # Assign rownames
@@ -258,7 +262,7 @@ get_city_geo <- function(city_name) {
   print("Computing mean area weighted PM2.5...")
   final_geo <- lapply(new_geo.list, function(df){
     #mclapply(df, get_census_pm, mc.cores = detectCores())
-    mclapply(df, get_census_pm, mc.cores = 1)
+    mclapply(df, get_census_pm, new_dal = new_dal, mc.cores = 1)
   })
   
   # Combine into single df
@@ -295,8 +299,22 @@ pull_city_ACAG <- function(year, city_state = c()){
   available_years <- c(2015, 2016, 2017, 2018)
   cities <- read.csv(file.path("data", "input", "all_cities.csv")) %>%
     mutate(city_state = paste0(city, "_", state))
-  us_cities <- read.csv(file.path("data", "input", "US_cities.csv"))
-  specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
+  # us_cities <- read.csv(file.path("data", "input", "US_cities.csv"))
+  # specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
+  
+  if (length(city_state) == 0){
+    city_state = cities$city_state
+  }
+  
+  state <- sapply(city_state, function(x){
+    unlist(strsplit(x, split = "_"))[2]
+  })
+  
+  city <- sapply(city_state, function(x){
+    unlist(strsplit(x, split = "_"))[1]
+  })
+  
+  city_df <- cbind.data.frame(city, state, city_state)
   
   ACAG_pm_dat_City <- data.frame(city_state = character(),
                                  GEOID = numeric(),
@@ -317,9 +335,6 @@ pull_city_ACAG <- function(year, city_state = c()){
       
       return(ACAG_pm_dat_City)
     }
-    else if (length(city_state) == 0){
-      #pull condensed
-    }
     else{
       ###THROW EXCEPTION
       stop("Improper input, unrecognized city")
@@ -337,15 +352,11 @@ pull_city_ACAG <- function(year, city_state = c()){
         ))
       dalhousie@data@names <- "Value"
       
-      projection_count <- 1
       #NEED TO ADJUST SO IT DOES SAME STATES IN SAME GO
-      dflist <- lapply(city_state, get_city_geo)
+      dflist <- lapply(city_state, get_city_geo, city_df, dalhousie)
       #dflist <- lapply(unique(cities$state), get_city_geo)
       ACAG_pm_dat_City <- bind_rows(dflist)
       return(ACAG_pm_dat_City)
-    }
-    else if (length(city_state) == 0){
-      #pull condensed
     }
     else{
       ###THROW EXCEPTION
