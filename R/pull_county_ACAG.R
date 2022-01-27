@@ -195,7 +195,7 @@ pull_county_ACAG <- function(year, county_state = c()){
   available_years <- c(2015, 2016, 2017, 2018)
   us_cities <- read.csv(file.path("data", "input", "US_cities.csv"))
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
-  every_county <- read.csv(file.path("data", "input", "all_counties.csv")) %>%
+  every_county <- read.csv(file.path("data", "input", "all_counties.csv"), encoding = "UTF-8") %>%
     mutate(county_state = paste0(county, "_", state))
 
   if (length(county_state) == 0){
