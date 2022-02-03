@@ -207,20 +207,12 @@ get_census_pm <- function(census, new_dal) {
 #' @param st string - state that city resides in
 #' @keywords internal
 #' @noRd
-get_census_geo <- function(this_city, st, city_df) {
+get_census_geo <- function(this_city, st) {
   # Need the city boundaries
   new_geo <- get_census_shape("city", st = st, city = this_city)
   
-  # Make sure that CRS projections match
-  new_dal <- #if (this_city == city_df$city[1]){
-    projectRaster(dalhousie, crs = crs(new_geo))
-  #}else { NULL }
-  
-  # Make sure name of data didn't change
-  new_dalhousie@data@names <- "Value"
-  
   #return(city_shp)
-  return(list("new_geo" = new_geo, "new_dal" = new_dal))
+  return(new_geo)
 }
 
 
@@ -242,14 +234,13 @@ get_city_geo <- function(city_name, city_df, dal) {
   
   print("Fetching census shape data for counties...")
   new_vars <- lapply(these_cities, function(this_city){
-    get_census_geo(this_city, st = st, city_df = city_df, dal = dal)
+    get_census_geo(this_city, st = st)
   })
   
-  new_dal <- new_vars[[1]]$new_dal
+  #Make sure that CRS projections match
+  new_dal <- projectRaster(dal, crs = crs(new_geo[[1]]))
   
-  new_geo <- lapply(new_vars, function(x){
-    return(x$new_geo)
-  })
+  new_dal@data@names <- "Value"
   
   # Assign rownames
   new_geo.list <- lapply(new_geo, function(df){

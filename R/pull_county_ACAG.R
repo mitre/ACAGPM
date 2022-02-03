@@ -83,7 +83,7 @@ get_census_pm <- function(census, new_dal) {
 #' @return data frame of tract level data for county and state with empty PM column
 #' @keywords internal
 #' @noRd
-get_census_geo <- function(cty_row, st, dal, cty_df.st) {
+get_census_geo <- function(cty_row, st) {
   cty <- cty_row$COUNTYFP
   
   # Get specific county shape info
@@ -97,26 +97,12 @@ get_census_geo <- function(cty_row, st, dal, cty_df.st) {
     "NAME"
   }
   
-  # Make sure that CRS projections match
-  new_dal <-
-    if (cty_row[[name_col]] == cty_df.st$county[1]) {
-      projectRaster(dal, crs = crs(county_geo))
-    } else {
-      NULL
-    }
-  
-  # Make sure name of data didn't change
-  if (!is.null(new_dal)){
-    new_dal@data@names <- "Value"
-  }
-  
   # Initialize particulate matter column
   new_geo <- county_geo %>%
     mutate(Particulate.Matter = NA_real_) %>%
     filter(AWATER / as.numeric(st_area(geometry)) < .9) # Remove tracts that are over 90
   
-  
-  return(list("new_geo" = new_geo, "new_dal" = new_dal))
+  return(new_geo)
 }
 
 
@@ -155,13 +141,10 @@ get_county_geo <- function(st, cty_df, dal) {
   
   # Get census shape info
   print("Fetching census shape data for counties...")
-  new_vars <- lapply(cty_row.list, get_census_geo, st = st, dal = dal, cty_df.st = cty_df.st)
+  new_geo <- lapply(cty_row.list, get_census_geo, st = st)
   
-  new_dal <- new_vars[[1]]$new_dal
-  
-  new_geo <- lapply(new_vars, function(x){
-    return(x$new_geo)
-  })
+  new_dal <- projectRaster(dal, crs = crs(new_geo[[1]]))
+  new_dal@data@names <- "Value"
   
   # Assign rownames
   new_geo.list <- lapply(new_geo, function(df){

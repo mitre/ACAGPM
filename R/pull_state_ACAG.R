@@ -54,8 +54,8 @@ get_county_pm <- function(census, new_dal){
 #' @param state - single state
 #' @keywords internal
 #' @noRd
-get_state_geo <- function(st, ct_df, dal){
-  geo <- 
+get_state_geo <- function(st, dal){
+  new_geo <- 
     if (st != "DC") {
       tigris::counties(st) %>%
         mutate(INTPTLAT = as.numeric(INTPTLAT),
@@ -65,13 +65,9 @@ get_state_geo <- function(st, ct_df, dal){
     }
   
   #RETURN TO THIS; IT'S BECAUSE OF THE WAY THINGS ARE PULLED
-  new_dal <- #if (st == ct_df[1]){
-    projectRaster(dal, crs = crs(geo))
-  #}else { new_dal }
+  new_dal <- projectRaster(dal, crs = crs(new_geo))
   
-  new_dalhousie@data@names <- "Value"
-  
-  new_geo <- geo
+  new_dal@data@names <- "Value"
   
   new_geo.list <-
     setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
@@ -104,10 +100,6 @@ get_state_geo <- function(st, ct_df, dal){
 #' @return dataframe, for PM2.5 of counties in each state
 pull_state_ACAG <- function(year, state = c()){
   available_years <- c(2015, 2016, 2017, 2018)
-  # cities <- read.csv(file.path("data", "input", "all_cities.csv")) %>%
-  #   mutate(city_state = paste0(city, "_", state))
-  # us_cities <- read.csv(file.path("data", "input", "US_cities.csv"))
-  # specific_us_cities <- read.csv(file.path("data", "input", "Specific_US_cities.csv"))
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
   
   if (length(state) == 0){
