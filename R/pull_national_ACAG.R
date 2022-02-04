@@ -24,10 +24,10 @@ get_pm_data <- function(state, new_dal){
   # Convert to an sf object
   dalhousie_sf <- st_as_sf(dalhousie_sp)
   
-  # Pulls geometry from Spatial object as sf
+  # Pulls geometry from Spatial object converted to sf
   new_geo_sf <- st_as_sf(new_geo_sp)$geometry
   
-  # Combines objects together to have PM2.5 readings combined with geometries
+  # Combines objects together to have PM2.5 levels with geometries
   census_dalhs_int <- st_intersection(dalhousie_sf, new_geo_sf)
   
   # Adds column corresponding to area of each polygon
