@@ -33,7 +33,7 @@ get_pm_data <- function(state, new_dal){
   # Adds column corresponding to area of each polygon
   census_dalhs_int$grid_area <- as.numeric(st_area(census_dalhs_int$geometry))
   
-  # Make weight = area/total census tract area -- i.e. percent coverage
+  # Make weight = area/total state area -- i.e. percent coverage
   ct_area <- as.numeric(st_area(new_geo_sf))
   census_dalhs_int$weight <- census_dalhs_int$grid_area/ct_area
   
@@ -119,6 +119,18 @@ pull_national_ACAG <- function(year){
         paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
       ))
     dalhousie@data@names <- "Value"
+    
+    ## Keeping these in case we want to define new_dalhousie once
+    # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
+    # new_dalhousie <- raster(
+    #   file.path(
+    #     "data",
+    #     "input",
+    #     "acag_raw_data_files",
+    #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
+    #   ),
+    #   crs = crs_args)
+    # new_dalhousie@data@names <- "Value"
     
     # Perform a pull, state by state
     Dalhousie_pm_dat_US <- get_national_geo(st = states, dal = dalhousie)

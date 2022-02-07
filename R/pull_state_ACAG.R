@@ -12,14 +12,11 @@ get_county_pm <- function(census, new_dal){
   # Convert shapefile to spatial object
   new_geo_sp <- as(census, "Spatial")
   
-  # Crops nationwide PM2.5 raster file to within tract's bounds
+  # Crops nationwide PM2.5 raster file to within county's bounds
   dalhousie_crop <- crop(new_dal, new_geo_sp, snap = "out")
   
   # Converts spatial object with PM2.5 levels to dataframe, including spatial coordinates
   dalhousie_df <- as.data.frame(dalhousie_crop, xy = T)
-  # Plot in base dalhousie
-  # plot(dalhousie_crop)
-  # plot(new_geo_sp, add = T)
   
   # Converts spatial object with PM2.5 levels to SpatialPolygonsDataFrame
   dalhousie_sp <- as(dalhousie_crop, "SpatialPolygonsDataFrame")
@@ -32,24 +29,13 @@ get_county_pm <- function(census, new_dal){
   
   # Combines objects together to have PM2.5 levels with geometries
   census_dalhs_int <- st_intersection(dalhousie_sf, new_geo_sf)
-  # plot(census_dalhs_int)
-  
   
   # Adds column corresponding to area of each polygon
   census_dalhs_int$grid_area <- as.numeric(st_area(census_dalhs_int$geometry))
   
-  
-  # Check to see that area calculations make sense
-  # census_dalhs_int$x <- st_coordinates(st_centroid(census_dalhs_int$geometry))[,1]
-  # census_dalhs_int$y <- st_coordinates(st_centroid(census_dalhs_int$geometry))[,2]
-  # ggplot(census_dalhs_int)+
-  #   geom_sf(aes(geometry = geometry, fill = Value))+
-  #   geom_point(aes(x = x, y = y, size = grid_area, alpha = grid_area))
-  
-  
   ## TODO: use sp intersect function to get areas within tracts and weight by area
   
-  # Make weight = area/total census tract area -- i.e. percent coverage
+  # Make weight = area/total county area -- i.e. percent coverage
   ct_area <- as.numeric(st_area(new_geo_sf))
   census_dalhs_int$weight <- census_dalhs_int$grid_area/ct_area
   
@@ -156,8 +142,8 @@ pull_state_ACAG <- function(year, state = c()){
       
       return(ACAG_pm_dat_State)
     }
+    # If an unrecognized state is entered, throw error
     else{
-      ###THROW EXCEPTION
       stop("Improper input, unrecognized state")
     }
   }
@@ -175,6 +161,18 @@ pull_state_ACAG <- function(year, state = c()){
           paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
         ))
       dalhousie@data@names <- "Value"
+      
+      ## Keeping these in case we want to define new_dalhousie once
+      # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
+      # new_dalhousie <- raster(
+      #   file.path(
+      #     "data",
+      #     "input",
+      #     "acag_raw_data_files",
+      #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
+      #   ),
+      #   crs = crs_args)
+      # new_dalhousie@data@names <- "Value"
       
       # Perform a pull state by state
       dflist <- lapply(state, get_state_geo, city_df, dalhousie)

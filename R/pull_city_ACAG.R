@@ -343,6 +343,18 @@ pull_city_ACAG <- function(year, city_state = c()){
         ))
       dalhousie@data@names <- "Value"
       
+      ## Keeping these in case we want to define new_dalhousie once
+      # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
+      # new_dalhousie <- raster(
+      #   file.path(
+      #     "data",
+      #     "input",
+      #     "acag_raw_data_files",
+      #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
+      #   ),
+      #   crs = crs_args)
+      # new_dalhousie@data@names <- "Value"
+      
       #NEED TO ADJUST SO IT DOES SAME STATES IN SAME GO
       dflist <- lapply(city_state, get_city_geo, city_df, dalhousie)
       #dflist <- lapply(unique(cities$state), get_city_geo)
