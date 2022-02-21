@@ -2,18 +2,27 @@
 % Please edit documentation in R/pull_county_ACAG.R
 \name{pull_county_ACAG}
 \alias{pull_county_ACAG}
-\title{Pulls PM data at county level, either internally or externally.
-If county field is empty, returns PM data for all counties.}
+\title{County level particulate matter data}
 \usage{
 pull_county_ACAG(year, county_state = c())
 }
 \arguments{
-\item{county_state}{}
+\item{year, }{numeric object representing a selected year}
+
+\item{county_state, }{character vector of selected counties}
 }
 \value{
-dataframe, for PM2.5 of counties in each state
+Dataframe object broken down by census tracts in each county with
+mean area-weighted PM2.5 values. If the county_state field is empty, PM2.5
+data for census tracts in all counties is returned. If input year is
+unavailable, returns an error.
 }
 \description{
-Pulls PM data at county level, either internally or externally.
-If county field is empty, returns PM data for all counties.
+Pulls PM2.5 data at a county level, either internally or externally. Years
+2015 through 2018 are pre-available within the package, but year ____ through
+2014 are available as an external pull.
+}
+\examples{
+pull_county_ACAG(year = 2016, state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
+pull_county_ACAG(year = 2016)
 }

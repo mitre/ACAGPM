@@ -2,7 +2,12 @@
 
 #' Function to perform mean area weighting within state to summarise PM2.5 
 #' concentrations from gridded data
-#' @param state df row of state features
+#' 
+#' @param state, dataframe of features for a given state
+#' @param new_dal, rasterLayer object with PM2.5 levels
+#' 
+#' @return Modified state dataframe with mean area-weighted PM2.5 levels
+#' 
 #' @keywords internal
 #' @noRd
 get_pm_data <- function(state, new_dal){
@@ -50,6 +55,12 @@ get_pm_data <- function(state, new_dal){
 #' Helper function to compute PM2.5 concentrations for every census tract for each
 #' state
 #'
+#' @param st, character string representing a state
+#' @param dal, rasterLayer object containing PM2.5 levels for the USA
+#' 
+#' @return Dataframe object containing GEOID, state, and PM2.5 levels for a 
+#' given state
+#' 
 #' @keywords internal
 #' @noRd
 get_national_geo <- function(st, dal){
@@ -84,15 +95,19 @@ get_national_geo <- function(st, dal){
 
 ## EXTERNAL
 
-#' Pulls PM data at national level, either internally or externally
+#' National level particulate matter data
+#' 
+#' Pulls PM2.5 data at a national level, either internally or externally. Years
+#' 2015 through 2018 are pre-available within the package, but years ____
+#' through 2014 are available as an external pull.
 #'
+#' @param year, numeric object representing a selected year
 #'
-#' @param year
-#'
-#' @return dataframe with requested data
+#' @return Dataframe object broken down by state with mean area-weighted PM2.5
+#' values. If input year is unavailable, returns an error.
 #'
 #' @examples 
-#' pull_national_ACAG(2016)
+#' pull_national_ACAG(year = 2016)
 pull_national_ACAG <- function(year){
   
   # Pre-available years

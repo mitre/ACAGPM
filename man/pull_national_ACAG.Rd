@@ -2,19 +2,22 @@
 % Please edit documentation in R/pull_national_ACAG.R
 \name{pull_national_ACAG}
 \alias{pull_national_ACAG}
-\title{Pulls PM data at national level, either internally or externally}
+\title{National level particulate matter data}
 \usage{
 pull_national_ACAG(year)
 }
 \arguments{
-\item{year}{}
+\item{year, }{numeric object representing a selected year}
 }
 \value{
-dataframe with requested data
+Dataframe object broken down by state with mean area-weighted PM2.5
+values. If input year is unavailable, returns an error.
 }
 \description{
-Pulls PM data at national level, either internally or externally
+Pulls PM2.5 data at a national level, either internally or externally. Years
+2015 through 2018 are pre-available within the package, but years ____
+through 2014 are available as an external pull.
 }
 \examples{
-pull_national_ACAG(2016)
+pull_national_ACAG(year = 2016)
 }

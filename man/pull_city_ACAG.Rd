@@ -2,18 +2,27 @@
 % Please edit documentation in R/pull_city_ACAG.R
 \name{pull_city_ACAG}
 \alias{pull_city_ACAG}
-\title{Pulls PM data at city level, either internally or externally.
-If city_state list is empty, returns condensed city list.}
+\title{City level particulate matter data}
 \usage{
 pull_city_ACAG(year, city_state = c())
 }
 \arguments{
-\item{city_state, }{list containing desired cities in format "city_st"}
+\item{year, }{numeric object representing a selected year}
+
+\item{city_state, }{character vector of selected cities}
 }
 \value{
-dataframe containing PM2.5 for tracts in each city, or PM2.5 tracts for all cities ((NOT AVAILABLE))
+Dataframe object broken down by census tracts in each city with
+mean area-weighted PM2.5 values. If the city_state field is empty, PM2.5
+data for census tracts in all cities is returned. If input year is
+unavailable, returns an error.
 }
 \description{
-Pulls PM data at city level, either internally or externally.
-If city_state list is empty, returns condensed city list.
+Pulls PM2.5 data at a city level, either internally or externally. Years
+2015 through 2018 are pre-available within the package, but year ____ through
+2014 are available as an external pull.
+}
+\examples{
+pull_city_ACAG(year = 2016, state = c("Akron_OH", "Albany_NY", "Altoona_PA"))
+pull_city_ACAG(year = 2016)
 }

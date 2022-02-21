@@ -2,7 +2,11 @@
 
 #' Helper function to compute mean area weighted PM2.5 concentration for a given
 #' county
-#' @param census data frame - single county with geometry
+#' @param census, dataframe of features for a given county
+#' @param new_dal, rasterLayer object with PM2.5 levels
+#' 
+#' @return Modified census dataframe with mean area-weighted PM2.5 levels
+#' 
 #' @keywords internal
 #' @noRd
 get_county_pm <- function(census, new_dal){
@@ -50,8 +54,14 @@ get_county_pm <- function(census, new_dal){
   return(census)
 }
 
-#' Function to compute county PM2.5 levels and save RData/csv files for each state
-#' @param state - single state
+#' Function to compute county PM2.5 levels for each state
+#' 
+#' @param st, character string representing a state
+#' @param dal, rasterLayer object containing PM2.5 levels for the USA
+#' 
+#' @return Dataframe object containing GEOID, county name, and PM2.5 levels for
+#' counties in a given state
+#' 
 #' @keywords internal
 #' @noRd
 get_state_geo <- function(st, dal){
@@ -94,13 +104,23 @@ get_state_geo <- function(st, dal){
 
 ## EXTERNAL
 
-#' Pulls PM data at state level, either internally or externally.
-#' If state field is empty, returns PM data for all states.
+#' State level particulate matter data
+#' 
+#' Pulls PM2.5 data at a state level, either internally or externally. Years
+#' 2015 through 2018 are pre-available within the package, but years ____ 
+#' through 2014 are available as an external pull.
 #'
-#' @param year
-#' @param state
+#' @param year, numeric object representing a selected year
+#' @param state, character vector of selected states
 #'
-#' @return dataframe, for PM2.5 of counties in each state
+#' @return Dataframe object broken down by counties in each state with mean 
+#' area-weighted PM2.5 values. If the state field is empty, PM2.5 data for 
+#' counties in all states is returned. If input year is unavailable, returns an 
+#' error.
+#' 
+#' @examples
+#' pull_state_ACAG(year = 2016, state = c("AL", "AK", "AZ"))
+#' pull_state_ACAG(year = 2016)
 pull_state_ACAG <- function(year, state = c()){
   
   # Pre-available years of data

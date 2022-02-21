@@ -1,56 +1,64 @@
 ## INTERNAL
 
-#' Function to save final processed data as CSV and Rdata files to output
-#' directory
-#' @param df data frame of processed data
-#' @param county_name vector of county names (as strings) in state
-#' @param state string - state abbreviation
-#' @keywords internal
-#' @noRd
-save_data <- function(df, state){
-  
-  # Initialize empty list
-  final_df.list <- c()
-  
-  for (name_index in 1:length(df)){
-    
-    # Pull county name for index
-    county_name <- names(df)[name_index]
-    
-    # Pull df with specific county
-    pm_data <- df[[county_name]]
-    
-    # Correct format
-    pm_data <- as.data.frame(pm_data)
-    
-    # Select desired columns  
-    pm_data <-
-      if (state != "DC") {
-        pm_data %>%
-          dplyr::select(GEOID, NAMELSAD, Particulate.Matter)
-      } else {
-        pm_data %>%
-          dplyr::select(GEOID, NAME, Particulate.Matter)
-      }
-    
-    # Adds column with county and state
-    pm_data <- pm_data %>%
-      add_column(county_state = rep(paste0(county_name, "_", state), nrow(pm_data)), .before = "GEOID")
-    
-    # Add data as new row to list of dataframes
-    final_df.list <- append(final_df.list, list(pm_data))
-  }
-  
-  # Compile into one dataframe
-  final_df <- bind_rows(final_df.list)
-  
-  return(final_df)
-}
+
+#' #Come back to this one
+#' #' Function to save final processed data as CSV and Rdata files to output
+#' #' directory
+#' #' 
+#' #' @param df data frame of processed data
+#' #' @param county_name vector of county names (as strings) in state
+#' #' @param state string - state abbreviation
+#' #' 
+#' #' @keywords internal
+#' #' @noRd
+#' save_data <- function(df, state){
+#'   
+#'   # Initialize empty list
+#'   final_df.list <- c()
+#'   
+#'   for (name_index in 1:length(df)){
+#'     
+#'     # Pull county name for index
+#'     county_name <- names(df)[name_index]
+#'     
+#'     # Pull df with specific county
+#'     pm_data <- df[[county_name]]
+#'     
+#'     # Correct format
+#'     pm_data <- as.data.frame(pm_data)
+#'     
+#'     # Select desired columns  
+#'     pm_data <-
+#'       if (state != "DC") {
+#'         pm_data %>%
+#'           dplyr::select(GEOID, NAMELSAD, Particulate.Matter)
+#'       } else {
+#'         pm_data %>%
+#'           dplyr::select(GEOID, NAME, Particulate.Matter)
+#'       }
+#'     
+#'     # Adds column with county and state
+#'     pm_data <- pm_data %>%
+#'       add_column(county_state = rep(paste0(county_name, "_", state), nrow(pm_data)), .before = "GEOID")
+#'     
+#'     # Add data as new row to list of dataframes
+#'     final_df.list <- append(final_df.list, list(pm_data))
+#'   }
+#'   
+#'   # Compile into one dataframe for state
+#'   final_df <- bind_rows(final_df.list)
+#'   
+#'   return(final_df)
+#' }
 
 #' Helper function to compute mean area weighted PM2.5 concentration for a given
 #' census tract
-#' @param census data frame - single census tract with geometry
-#' @return data frame with mean weight PM2.5 estimates propagated for that CT
+#' 
+#' @param census, dataframe of features for a given census tract
+#' @param new_dal, rasterLayer object with PM2.5 levels
+#' 
+#' @return Modified census dataframe with mean area-weighted PM2.5 levels
+#' 
 #' @keywords internal
 #' @noRd
 get_census_pm <- function(census, new_dal) {
@@ -100,11 +108,14 @@ get_census_pm <- function(census, new_dal) {
   return(census)
 }
 
-#' Helper function to grab and transform all census tracts within a given county
-#' and initialize particulate matter column to be passed to get_census_pm
-#' @param cty_row data frame - single county with geometry
-#' @param st string - state that county resides in
-#' @return data frame of tract level data for county and state with empty PM column
+#' Helper function to pull census tract shapefile for a county and initialize 
+#' particulate matter column to be passed to get_census_pm
+#' 
+#' @param cty_row, dataframe of single county with geometry
+#' @param st, character string representing a state
+#' 
+#' @return Dataframe of tract level data for county and state with empty PM column
+#' 
 #' @keywords internal
 #' @noRd
 get_census_geo <- function(cty_row, st) {
@@ -133,10 +144,14 @@ get_census_geo <- function(cty_row, st) {
 }
 
 
-#' Helper function to compute PM2.5 concentrations for every census tract for each
-#' county in this state
-#' @param st string - state
-#' @param cty_df dataframe
+#' Function to compute census tract PM2.5 levels for each county
+#' 
+#' @param st, character string representing a state
+#' @param dal, rasterLayer object containing PM2.5 levels for the USA
+#' 
+#' @return Dataframe object containing GEOID, census tract, and PM2.5 levels for
+#' census tracts in a given county
+#' 
 #' @keywords internal
 #' @noRd
 get_county_geo <- function(st, cty_df, dal) {
@@ -201,13 +216,23 @@ get_county_geo <- function(st, cty_df, dal) {
 
 ## EXTERNAL
 
-#' Pulls PM data at county level, either internally or externally.
-#' If county field is empty, returns PM data for all counties.
+#' County level particulate matter data
+#' 
+#' Pulls PM2.5 data at a county level, either internally or externally. Years
+#' 2015 through 2018 are pre-available within the package, but year ____ through 
+#' 2014 are available as an external pull.
 #'
-#' @param year
-#' @param county_state
+#' @param year, numeric object representing a selected year
+#' @param county_state, character vector of selected counties
 #'
-#' @return dataframe, for PM2.5 of counties in each state
+#' @return Dataframe object broken down by census tracts in each county with 
+#' mean area-weighted PM2.5 values. If the county_state field is empty, PM2.5 
+#' data for census tracts in all counties is returned. If input year is 
+#' unavailable, returns an error.
+#' 
+#' @examples
+#' pull_county_ACAG(year = 2016, state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
+#' pull_county_ACAG(year = 2016)
 pull_county_ACAG <- function(year, county_state = c()){
   
   # Pre-available years of data
