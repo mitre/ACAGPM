@@ -26,5 +26,8 @@ Imports:
     tibble,
     tidycensus
 Suggests: 
+    rmarkdown,
+    knitr,
     testthat
 Config/testthat/edition: 3
+VignetteBuilder: knitr

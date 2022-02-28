@@ -1,0 +1,64 @@
+---
+title: "ACAGPM-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ACAGPM-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+library(ACAGPM)
+```
+
+## Introduction
+
+Particulate Matter (PM2.5) is a term referring to microscopic particles, not greater than 2.5 micro-meters in diameter, suspended in air. These particles have a variety of adverse health effects on humans, given their ability to quickly enter the bloodstream via inhalation. Research initiatives, specifically with regards to climate and human health, can greatly benefit from access to PM2.5 data; this package provides users with easy access to said data.
+
+## Available Data
+
+This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with *tigris* shapefile data at 3 different levels for a variety of years. Those three levels are as follows:
+
+1. National, broken down by states
+2. States, broken down by counties
+3. Counties, broken down by census tracts
+
+Years 2015 through 2018 are included within the package, while years ____ through 2014 are available as external pulls of data. Data is returned in csv format, including the fields GEOID, NAME, and Particulate.Matter. An additional field is included for state and county pulls, representing the states or counties chosen by the user, respectively.
+
+The PM2.5 levels are the mean area-weighted PM2.5 values for a select area.
+
+**Note: Alaska and Hawaii are not available.**
+
+## How to Use
+
+### National: pull_national_ACAG(year)
+
+Pulls nationwide data for a given year, broken down by available states with PM2.5 levels.
+
+```{r}
+national_pm <- ACAGPM::pull_national_ACAG(year = 2016)
+head(national_pm)
+```
+
+### State: pull_state_ACAG(year, state)
+
+Pulls statewide data for a given year, broken down by counties with PM2.5 levels.
+
+```{r}
+state_pm <- ACAGPM::pull_state_ACAG(year = 2016, state = c("AL", "AR", "AZ"))
+head(state_pm)
+```
+
+### County: pull_county_ACAG(year, county_state)
+
+Pulls countywide data for a given year, broken down by census tracts with PM2.5 levels.
+
+```{r}
+county_pm <- ACAGPM::pull_county_ACAG(year = 2016, county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
+head(county_pm)
+```
