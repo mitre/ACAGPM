@@ -15,7 +15,7 @@ get_county_pm <- function(census, new_acag){
   new_geo_sp <- as(census, "Spatial")
 
   # Crops nationwide PM2.5 raster file to within county's bounds
-  acag_crop <- crop(new_acag, new_geo_sp, snap = "out")
+  acag_crop <- raster::crop(new_acag, new_geo_sp, snap = "out")
 
   # Converts spatial object with PM2.5 levels to dataframe, including spatial coordinates
   acag_df <- as.data.frame(acag_crop, xy = T)
@@ -24,21 +24,21 @@ get_county_pm <- function(census, new_acag){
   acag_sp <- as(acag_crop, "SpatialPolygonsDataFrame")
 
   # Convert to an sf object
-  acag_sf <- st_as_sf(acag_sp)
+  acag_sf <- sf::st_as_sf(acag_sp)
 
   # Pulls geometry from spatial object converted to sf
-  new_geo_sf <- st_as_sf(new_geo_sp)$geometry
+  new_geo_sf <- sf::st_as_sf(new_geo_sp)$geometry
 
   # Combines objects together to have PM2.5 levels with geometries
-  census_acag_int <- st_intersection(acag_sf, new_geo_sf)
+  census_acag_int <- sf::st_intersection(acag_sf, new_geo_sf)
 
   # Adds column corresponding to area of each polygon
-  census_acag_int$grid_area <- as.numeric(st_area(census_acag_int$geometry))
+  census_acag_int$grid_area <- as.numeric(sf::st_area(census_acag_int$geometry))
 
   ## TODO: use sp intersect function to get areas within tracts and weight by area
 
   # Make weight = area/total county area -- i.e. percent coverage
-  ct_area <- as.numeric(st_area(new_geo_sf))
+  ct_area <- as.numeric(sf::st_area(new_geo_sf))
   census_acag_int$weight <- census_acag_int$grid_area/ct_area
 
   # Tract value is weighted average of PM2.5 levels
@@ -74,7 +74,7 @@ get_state_geo <- function(st, acag){
     }
 
   # CRS needs to line up
-  new_acag <- projectRaster(acag, crs = crs(new_geo))
+  new_acag <- raster::projectRaster(acag, crs = crs(new_geo))
   new_acag@data@names <- "Value"
 
   # Convert df to a list to be able to parallelize in mclapply
@@ -82,7 +82,7 @@ get_state_geo <- function(st, acag){
     setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
 
   # Perform parallel computation, which pulls PM2.5 levels for each county in the state
-  new_geo.list_PM <- mclapply(new_geo.list, get_county_pm, new_acag = new_acag, mc.cores = 1)
+  new_geo.list_PM <- parallel::mclapply(new_geo.list, get_county_pm, new_acag = new_acag, mc.cores = 1)
   pm_data <- do.call("rbind", new_geo.list_PM) # Back to df
 
   # Pull desired columns
@@ -103,9 +103,10 @@ get_state_geo <- function(st, acag){
 
 #' County level particulate matter data
 #'
-#' Pulls PM2.5 data at a county level, either internally or externally. Years
+#' Pulls PM2.5 data at a county level, either internally or as a new pull. Years
 #' 2015 through 2018 are pre-available within the package, but years 2014 and
-#' earlier are available as an external pull.
+#' earlier are available as a pull combining PM2.5 raster files and tigris
+#' shape files.
 #'
 #' @param year, numeric object representing a selected year
 #' @param state, character vector of selected states
@@ -138,15 +139,17 @@ pull_county_ACAG <- function(year, state = c()){
                                  NAME = character(),
                                  Particulate.Matter = numeric())
 
-  # # Returns csv corresponding to the available year as a dataframe object
+  # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
+  # Else, returns an object pulled from selected year of data as a dataframe.
+  # Returns an error if unrecognized state is selected as input.
   if (year %in% available_years){
-    # Returns csvs corresponding to given year in selected states as a combined dataframe object
     if (all(state %in% states)){
 
       # Pulls selected data as list of dataframes
       dflist <- lapply(state, function(x){
         # Pull csv for state
-        tempdf <- read.csv(file.path("..", "data", "output", year, "State", paste0("Dalhousie_pm_dat_", x, ".csv")))
+        tempdf <- read.csv(system.file(file.path("data", "output", year, "county", paste0("acag_pm_dat_", x, ".csv")),
+                                       package = "ACAGPM"))
 
         # Add column with name of state
         tempdf <- tempdf %>%
@@ -159,30 +162,19 @@ pull_county_ACAG <- function(year, state = c()){
       ACAG_pm_dat_State <- dplyr::bind_rows(dflist)
 
       return(ACAG_pm_dat_State)
-    }
-    # If an unrecognized state is entered, throw error
-    else{
+    } else{
       stop("Improper input, unrecognized state")
     }
-  }
-
-  # Returns an object pulled from selected year of data as a dataframe
-  else{
-    # Pull PM2.5 data for the given year in selected states
+  } else{
     if (all(state %in% states)){
       # Pull PM2.5 for the given year
-      acag <- raster(
-        file.path(
-          "data",
-          "input",
-          "acag_raw_data_files",
-          paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
-        ))
+      acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
+                                 package = "ACAGPM"))
       acag@data@names <- "Value"
 
       ## Keeping these in case we want to define new_acag once
       # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
-      # new_acag <- raster(
+      # new_acag <- raster::raster(
       #   file.path(
       #     "data",
       #     "input",
@@ -199,9 +191,7 @@ pull_county_ACAG <- function(year, state = c()){
       ACAG_pm_dat_State <- bind_rows(dflist)
 
       return(ACAG_pm_dat_State)
-    }
-    # If an unrecognized state is entered, throw error
-    else{
+    } else{
       stop("Improper input, unrecognized state")
     }
   }

@@ -339,7 +339,6 @@ get_city_geo <- function(city_name, city_df, dal) {
 #' @examples
 #' pull_city_ACAG(year = 2016, state = c("Akron_OH", "Albany_NY", "Altoona_PA"))
 #' pull_city_ACAG(year = 2016)
-#' @export
 pull_city_ACAG <- function(year, city_state = c()){
 
   # Pre-available years of data
