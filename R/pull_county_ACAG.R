@@ -55,13 +55,20 @@ get_county_pm <- function(census, new_acag){
 #'
 #' @param st, character string representing a state
 #' @param acag, rasterLayer object containing PM2.5 levels for the USA
+#' @param county_df, dataframe containing county data
 #'
 #' @return Dataframe object containing GEOID, county name, and PM2.5 levels for
 #' counties in a given state
 #'
 #' @keywords internal
 #' @noRd
-get_state_geo <- function(st, acag){
+get_state_geo <- function(st, acag, county_df){
+
+  if (!(length(county_df) == 0)){
+    county_names <- county_df %>%
+      dplyr::filter(state == st) %>%
+      dplyr::pull(county)
+  }
 
   # Load shapefile for counties in given state
   new_geo <-
@@ -72,6 +79,11 @@ get_state_geo <- function(st, acag){
     } else {
       tigris::counties(st, cb = T)
     }
+
+  if (!is.null(county_df)){
+    new_geo <- new_geo %>%
+      dplyr::filter(NAMELSAD %in% county_names)
+  }
 
   # CRS needs to line up
   new_acag <- raster::projectRaster(acag, crs = crs(new_geo))
@@ -109,18 +121,20 @@ get_state_geo <- function(st, acag){
 #' shape files.
 #'
 #' @param year, numeric object representing a selected year
+#' @param level, character string representing desired granularity of pull
 #' @param state, character vector of selected states
+#' @param county_state, character vector of selected counties
 #'
-#' @return Dataframe object broken down by counties in selected state with mean
-#' area-weighted PM2.5 values. If the state field is empty, PM2.5 data for
-#' counties in all states is returned. If input year is unavailable, returns an
+#' @return Dataframe object broken down by counties with mean
+#' area-weighted PM2.5 values. If input year is unavailable, returns an
 #' error.
 #'
 #' @examples
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, state = c("AL", "AK", "AZ"))
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016)
+#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "National")
+#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "State", state = c("AL", "AK", "AZ"))
+#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "County", county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
 #' @export
-pull_county_ACAG <- function(year, state = c()){
+pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
 
   # Pre-available years of data
   available_years <- c(2015, 2016, 2017, 2018)
@@ -128,28 +142,65 @@ pull_county_ACAG <- function(year, state = c()){
   # Does not include Alaska or Hawaii
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
 
-  # If no states are entered, pull PM2.5 for all states
-  if (length(state) == 0){
-    state = states
+  # Dataframe of all available counties a user can choose; total count 3108
+  every_county <- read.csv(system.file(file.path("data", "input", "all_counties.csv"), package = "ACAGPM"), encoding = "UTF-8") %>%
+    dplyr::mutate(county_state = paste0(county, "_", state))
+
+  county_df = NULL
+
+  if (level == "National"){
+    st <- states
+  } else if (level == "State"){
+    if (all(state %in% states)){
+      st <- state
+    } else{
+      stop("Improper input, unrecognized state")
+    }
+  } else if (level == "County"){
+    if (all(county_state %in% every_county$county_state)){
+      st <- unique(county_df$state)
+
+      # Creates vector containing states chosen
+      state <- sapply(county_state, function(x){
+        unlist(strsplit(x, split = "_"))[2]
+      })
+
+      # Creates vector containing counties chosen
+      county <- sapply(county_state, function(x){
+        unlist(strsplit(x, split = "_"))[1]
+      })
+
+      # Dataframe of user input and additional information
+      county_df <- cbind.data.frame(county, state, county_state)
+
+    } else{
+      stop("Improper input, unrecognized county")
+    }
+  } else{
+    stop("Improper input, unrecognized level")
   }
 
   # Initialized dataframe; do we need this?
-  ACAG_pm_dat_State <- data.frame(state = character(),
-                                 GEOID = numeric(),
-                                 NAME = character(),
-                                 Particulate.Matter = numeric())
+  ACAG_pm_dat_County <- data.frame(county_state = character(),
+                                   GEOID = numeric(),
+                                   NAME = character(),
+                                   Particulate.Matter = numeric())
 
   # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   # Returns an error if unrecognized state is selected as input.
   if (year %in% available_years){
-    if (all(state %in% states)){
 
       # Pulls selected data as list of dataframes
-      dflist <- lapply(state, function(x){
+      dflist <- lapply(st, function(x){
         # Pull csv for state
         tempdf <- read.csv(system.file(file.path("data", "output", year, "county", paste0("acag_pm_dat_", x, ".csv")),
                                        package = "ACAGPM"))
+
+        if (level == "County"){
+          tempdf <- tempdf %>%
+            dplyr::filter(NAME %in% (county_df %>% dplyr::filter(state == x) %>% dplyr::pull(county)))
+        }
 
         # Add column with name of state
         tempdf <- tempdf %>%
@@ -162,11 +213,9 @@ pull_county_ACAG <- function(year, state = c()){
       ACAG_pm_dat_State <- dplyr::bind_rows(dflist)
 
       return(ACAG_pm_dat_State)
-    } else{
-      stop("Improper input, unrecognized state")
-    }
+
   } else{
-    if (all(state %in% states)){
+
       # Pull PM2.5 for the given year
       acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
                                  package = "ACAGPM"))
@@ -185,14 +234,12 @@ pull_county_ACAG <- function(year, state = c()){
       # new_acag@data@names <- "Value"
 
       # Perform a pull state by state
-      dflist <- lapply(state, get_state_geo, city_df, acag)
+      dflist <- lapply(st, get_state_geo, acag, county_df)
 
       # Convert list of dataframes to dataframe
-      ACAG_pm_dat_State <- bind_rows(dflist)
+      ACAG_pm_dat_State <- dplyr::bind_rows(dflist)
 
       return(ACAG_pm_dat_State)
-    } else{
-      stop("Improper input, unrecognized state")
-    }
+
   }
 }

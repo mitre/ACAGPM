@@ -4,17 +4,28 @@
 \alias{pull_tract_ACAG}
 \title{Tract level particulate matter data}
 \usage{
-pull_tract_ACAG(year, county_state = c())
+pull_tract_ACAG(
+  year,
+  level,
+  state = c(),
+  county_state = c(),
+  tract_county_state = c()
+)
 }
 \arguments{
 \item{year, }{numeric object representing a selected year}
 
+\item{level, }{character string representing desired granularity of pull}
+
+\item{state, }{character vector of selected states}
+
 \item{county_state, }{character vector of selected counties}
+
+\item{tract_county_state, }{character vector of selected tracts}
 }
 \value{
-Dataframe object broken down by census tracts in each selected county with
-mean area-weighted PM2.5 values. If the county_state field is empty, PM2.5
-data for census tracts in all counties is returned. If input year is
+Dataframe object broken down by census tracts with
+mean area-weighted PM2.5 values. If input year is
 unavailable, returns an error.
 }
 \description{
@@ -24,6 +35,8 @@ earlier are available as a pull combining PM2.5 raster files and tigris
 shape files.
 }
 \examples{
-acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
-acag_pm_dat_tract <- pull_tract_ACAG(year = 2016)
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "National")
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "State", state = c("AL", "AK", "AZ"))
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "County", county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c("Census Tract 9502_Abbeville County_SC", "Census Tract 9503_Abbeville County_SC", "Census Tract 9506_Abbeville County_SC"))
 }

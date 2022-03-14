@@ -4,17 +4,20 @@
 \alias{pull_county_ACAG}
 \title{County level particulate matter data}
 \usage{
-pull_county_ACAG(year, state = c())
+pull_county_ACAG(year, level, state = c(), county_state = c())
 }
 \arguments{
 \item{year, }{numeric object representing a selected year}
 
+\item{level, }{character string representing desired granularity of pull}
+
 \item{state, }{character vector of selected states}
+
+\item{county_state, }{character vector of selected counties}
 }
 \value{
-Dataframe object broken down by counties in selected state with mean
-area-weighted PM2.5 values. If the state field is empty, PM2.5 data for
-counties in all states is returned. If input year is unavailable, returns an
+Dataframe object broken down by counties with mean
+area-weighted PM2.5 values. If input year is unavailable, returns an
 error.
 }
 \description{
@@ -24,6 +27,7 @@ earlier are available as a pull combining PM2.5 raster files and tigris
 shape files.
 }
 \examples{
-acag_pm_dat_county <- pull_county_ACAG(year = 2016, state = c("AL", "AK", "AZ"))
-acag_pm_dat_county <- pull_county_ACAG(year = 2016)
+acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "National")
+acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "State", state = c("AL", "AK", "AZ"))
+acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "County", county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
 }

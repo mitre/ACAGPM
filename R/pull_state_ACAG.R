@@ -64,7 +64,7 @@ get_national_geo <- function(st, acag){
 
   # Load shapefile for given state
   geo <- tigris::states(cb = T) %>%
-    filter(STUSPS %in% st)
+    dplyr::filter(STUSPS %in% st)
 
   # CRS needs to line up
   new_acag <- raster::projectRaster(acag, crs = raster::crs(geo))
@@ -100,14 +100,17 @@ get_national_geo <- function(st, acag){
 #' shape files.
 #'
 #' @param year, numeric object representing a selected year
+#' @param level, character string representing desired granularity of pull
+#' @param state, character vector of selected states
 #'
 #' @return Dataframe object broken down by state with mean area-weighted PM2.5
 #' values. If input year is unavailable, returns an error.
 #'
 #' @examples
-#' acag_pm_dat_state <- pull_state_ACAG(year = 2016)
+#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
+#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("AL", "AR", "AZ"))
 #' @export
-pull_state_ACAG <- function(year){
+pull_state_ACAG <- function(year, level, state = c()){
 
   # Pre-available years
   available_years <- c(2015, 2016, 2017, 2018)
@@ -121,7 +124,19 @@ pull_state_ACAG <- function(year){
   # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   if (year %in% available_years){
-    return(read.csv(file_path))
+    acag_pm_dat_US <- read.csv(file_path)
+
+    # If level is state, pulls selected states from data. If invalid state is
+    # entered, an error is thrown.
+    if (level == "State"){
+      if (all(state %in% states)){
+        acag_pm_dat_US <- acag_pm_dat_US %>%
+          dplyr::filter(NAME %in% state.name[match(state, state.abb)])
+      } else{
+        stop("Improper input, unrecognized state")
+      }
+    }
+    return(acag_pm_dat_US)
   } else{
     # Pull PM2.5 data for the given year
     acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
@@ -140,8 +155,22 @@ pull_state_ACAG <- function(year){
     #   crs = crs_args)
     # new_acag@data@names <- "Value"
 
+    # If level is state, sets pull to selected states. If invalid state is
+    # entered, an error is thrown.
+    if (level == "National"){
+      st <- states
+    } else if (level == "State"){
+      if (all(state %in% states)){
+        st <- state
+      } else{
+        stop("Improper input, unrecognized state")
+      }
+    } else{
+      stop("Improper input, unrecognized level")
+    }
+
     # Perform a pull, state by state
-    acag_pm_dat_US <- get_national_geo(st = states, acag = acag)
+    acag_pm_dat_US <- get_national_geo(st = st, acag = acag)
 
     return(acag_pm_dat_US)
   }

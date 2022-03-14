@@ -46,7 +46,7 @@ save_data <- function(df, state){
   }
 
   # Compile into one dataframe for state
-  final_df <- bind_rows(final_df.list)
+  final_df <- dplyr::bind_rows(final_df.list)
 
   return(final_df)
 }
@@ -112,15 +112,21 @@ get_census_pm <- function(census, new_acag) {
 #'
 #' @keywords internal
 #' @noRd
-get_census_geo <- function(cty_row, st) {
+get_census_geo <- function(cty_row, st, level, tract_df.st) {
 
   # Pull county name
   cty <- cty_row$COUNTYFP
 
   # Get specific county shape info
   county_geo <- tigris::tracts(state = st, county = cty) %>%
-    mutate(INTPTLAT = as.numeric(INTPTLAT),
+    dplyr::mutate(INTPTLAT = as.numeric(INTPTLAT),
            INTPTLON = as.numeric(INTPTLON))
+
+  if (level == "Tract"){
+    pulled_tract <- tract_df.st %>% dplyr::filter(county == cty_row$NAMELSAD) %>% dplyr::pull(tract)
+    county_geo <- county_geo %>%
+      dplyr::filter(NAMELSAD %in% pulled_tract)
+  }
 
   # Choose name column
   name_col <- if (st != "DC") {
@@ -132,7 +138,7 @@ get_census_geo <- function(cty_row, st) {
   # Initialize particulate matter column
   new_geo <- county_geo %>%
     dplyr::mutate(Particulate.Matter = NA_real_) %>%
-    dplyr::filter(AWATER / as.numeric(st_area(geometry)) < .9) # Remove tracts that are over 90
+    dplyr::filter(AWATER / as.numeric(sf::st_area(geometry)) < .9) # Remove tracts that are over 90
 
   return(new_geo)
 }
@@ -148,21 +154,23 @@ get_census_geo <- function(cty_row, st) {
 #'
 #' @keywords internal
 #' @noRd
-get_county_geo <- function(st, cty_df, acag) {
+get_county_geo <- function(st, tract_df, level, acag) {
 
   # Get Counties in state, filter to cty_df only in state
-  cty_df.st <- cty_df %>%
+  tract_df.st <- tract_df %>%
     dplyr::filter(state == st)
 
   # Load shapefile for counties in given state
+
   geo <-
     if (st != "DC") {
       tigris::counties(st) %>%
         dplyr::mutate(INTPTLAT = as.numeric(INTPTLAT),
-               INTPTLON = as.numeric(INTPTLON))
+                INTPTLON = as.numeric(INTPTLON))
     } else {
       tigris::counties(st, cb = T)
     }
+
 
   # Selecting name column
   name_col <- if (st != "DC") {
@@ -176,12 +184,14 @@ get_county_geo <- function(st, cty_df, acag) {
     setNames(split(geo, seq(nrow(geo))), geo[[name_col]])
 
   # Filter to selected counties
-  cty_row.list <-
-    cty_row.list[unlist(lapply(names(cty_row.list), function(x){
-      x %in% cty_df.st$county}))]
+  if (level == "County" || level == "Tract"){
+    cty_row.list <-
+      cty_row.list[unlist(lapply(names(cty_row.list), function(x){
+        x %in% tract_df.st$county}))]
+  }
 
   # Get census tract shape info
-  new_geo <- lapply(cty_row.list, get_census_geo, st = st)
+  new_geo <- lapply(cty_row.list, get_census_geo, st = st, level, tract_df.st)
 
   # CRS needs to line up
   new_acag <- raster::projectRaster(acag, crs = raster::crs(new_geo[[1]]))
@@ -198,7 +208,7 @@ get_county_geo <- function(st, cty_df, acag) {
   })
 
   # Combine into single df
-  final_geo.df <- lapply(final_geo, bind_rows)
+  final_geo.df <- lapply(final_geo, dplyr::bind_rows)
 
   # Save
   return(save_data(df = final_geo.df, state = st))
@@ -214,24 +224,25 @@ get_county_geo <- function(st, cty_df, acag) {
 #' shape files.
 #'
 #' @param year, numeric object representing a selected year
+#' @param level, character string representing desired granularity of pull
+#' @param state, character vector of selected states
 #' @param county_state, character vector of selected counties
+#' @param tract_county_state, character vector of selected tracts
 #'
-#' @return Dataframe object broken down by census tracts in each selected county with
-#' mean area-weighted PM2.5 values. If the county_state field is empty, PM2.5
-#' data for census tracts in all counties is returned. If input year is
+#' @return Dataframe object broken down by census tracts with
+#' mean area-weighted PM2.5 values. If input year is
 #' unavailable, returns an error.
 #'
 #' @examples
-#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
-#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016)
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "National")
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "State", state = c("AL", "AK", "AZ"))
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "County", county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c("Census Tract 9502_Abbeville County_SC", "Census Tract 9503_Abbeville County_SC", "Census Tract 9506_Abbeville County_SC"))
 #' @export
-pull_tract_ACAG <- function(year, county_state = c()){
+pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_county_state = c()){
 
   # Pre-available years of data
   available_years <- c(2015, 2016, 2017, 2018)
-
-  # Dataframe of info related to US cities
-  us_cities <- read.csv(system.file(file.path("data", "input", "US_cities.csv"), package = "ACAGPM"))
 
   # Does not include Alaska or Hawaii
   states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
@@ -240,26 +251,77 @@ pull_tract_ACAG <- function(year, county_state = c()){
   every_county <- read.csv(system.file(file.path("data", "input", "all_counties.csv"), package = "ACAGPM"), encoding = "UTF-8") %>%
     dplyr::mutate(county_state = paste0(county, "_", state))
 
-  # If no counties are entered, pull PM2.5 for al states
-  if (length(county_state) == 0){
-    county_state <- every_county$county_state
+  every_tract <- read.csv(system.file(file.path("data", "input", "all_tracts.csv"), package = "ACAGPM"), encoding = "UTF-8") %>%
+    dplyr::mutate(tract_county_state = paste0(tract, "_", county, "_", state))
+
+  if (level == "National"){
+    st <- states
+
+    county_state <- every_county %>%
+      dplyr::pull(county_state)
+  } else if (level == "State"){
+    if (all(state %in% states)){
+      st <- state
+
+      county_state <- every_county %>%
+        dplyr::filter(state %in% st) %>%
+        dplyr::pull(county_state)
+    } else{
+      stop("Improper input, unrecognized state")
+    }
+  } else if (level == "County"){
+    if (all(county_state %in% every_county$county_state)){
+
+      # Creates vector containing states chosen
+      state <- sapply(county_state, function(x){
+        unlist(strsplit(x, split = "_"))[2]
+      })
+
+      # Creates vector containing counties chosen
+      county <- sapply(county_state, function(x){
+        unlist(strsplit(x, split = "_"))[1]
+      })
+
+      # Dataframe of user input and additional information
+      tract_df <- cbind.data.frame(county, state, county_state)
+
+      st <- unique(tract_df$state)
+    } else{
+      stop("Improper input, unrecognized county")
+    }
+  } else if (level == "Tract"){
+    if (all(tract_county_state %in% every_tract$tract_county_state)){
+
+      # Creates vector containing states chosen
+      state <- sapply(tract_county_state, function(x){
+        unlist(strsplit(x, split = "_"))[3]
+      })
+
+      # Creates vector containing counties chosen
+      county <- sapply(tract_county_state, function(x){
+        unlist(strsplit(x, split = "_"))[2]
+      })
+
+      # Creates a vector containing tracts chosen
+      tract <- sapply(tract_county_state, function(x){
+        unlist(strsplit(x, split = "_"))[1]
+      })
+
+      county_state <- paste0(county, "_", state)
+
+      # Dataframe of user input and additional information
+      tract_df <- cbind.data.frame(tract, county, state, county_state, tract_county_state)
+
+      st <- unique(tract_df$state)
+    } else{
+      stop("Improper input, unrecognized tract")
+    }
+  } else{
+    stop("Improper input, unrecognized level")
   }
 
-  # Creates vector containing states chosen
-  state <- sapply(county_state, function(x){
-    unlist(strsplit(x, split = "_"))[2]
-  })
-
-  # Creates vector containing counties chosen
-  county <- sapply(county_state, function(x){
-    unlist(strsplit(x, split = "_"))[1]
-  })
-
-  # Dataframe of user input and additional information
-  county_df <- cbind.data.frame(county, state, county_state)
-
   # Initialized dataframe; do we need this?
-  ACAG_pm_dat_County <- data.frame(county_state = character(),
+  ACAG_pm_dat_County <- data.frame(tract_county_state = character(),
                                   GEOID = numeric(),
                                   NAME = character(),
                                   Particulate.Matter = numeric())
@@ -268,55 +330,55 @@ pull_tract_ACAG <- function(year, county_state = c()){
   # Else, returns an object pulled from selected year of data as a dataframe.
   # Returns an error if unrecognized state is selected as input.
   if (year %in% available_years){
-    if (all(county_state %in% every_county$county_state)){
 
-      # Pulls selected data as list of dataframes
-      dflist <- lapply(county_state, function(x){
-        # Pull csv for county
-        tempdf <- read.csv(system.file(file.path("data", "output", year, "tract", paste0("acag_pm_dat_", x, ".csv")), package = "ACAGPM"))
+    # Pulls selected data as list of dataframes
+    dflist <- lapply(county_state, function(x){
+      # Pull csv for county
+      tempdf <- read.csv(system.file(file.path("data", "output", year, "tract", paste0("acag_pm_dat_", x, ".csv")), package = "ACAGPM"))
 
-        # Add column with name of county and state
+      if (level == "Tract"){
         tempdf <- tempdf %>%
-          tibble::add_column(county_state = rep(x, nrow(tempdf)), .before = "GEOID")
+         dplyr::filter(NAMELSAD %in% (tract_df %>% dplyr::filter(county_state == x) %>% dplyr::pull(tract)))
+      }
 
-        return(tempdf)
-      })
+      # Add column with name of county and state
+      tempdf <- tempdf %>%
+        tibble::add_column(county_state = rep(x, nrow(tempdf)), .before = "GEOID")
 
-      # Convert list of dataframes to dataframe
-      ACAG_pm_dat_County <- dplyr::bind_rows(dflist)
+      return(tempdf)
+    })
 
-      return(ACAG_pm_dat_County)
-    } else{ # If an unrecognized county is entered, throw error
-      stop("Improper input, unrecognized county")
-    }
+    # Convert list of dataframes to dataframe
+    ACAG_pm_dat_County <- dplyr::bind_rows(dflist)
+
+    return(ACAG_pm_dat_County)
+
   } else{
-    if (all(county_state %in% every_county$county_state)){
-      # Pull PM2.5 for the given year
-      acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
+
+    # Pull PM2.5 for the given year
+    acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
                                  package = "ACAGPM"))
-      acag@data@names <- "Value"
+    acag@data@names <- "Value"
 
-      ## Keeping these in case we want to define new_acag once
-      # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
-      # new_acag <- raster::raster(
-      #   file.path(
-      #     "data",
-      #     "input",
-      #     "acag_raw_data_files",
-      #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
-      #   ),
-      #   crs = crs_args)
-      # new_acag@data@names <- "Value"
+    ## Keeping these in case we want to define new_acag once
+    # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
+    # new_acag <- raster::raster(
+    #   file.path(
+    #     "data",
+    #     "input",
+    #     "acag_raw_data_files",
+    #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
+    #   ),
+    #   crs = crs_args)
+    # new_acag@data@names <- "Value"
 
-      #Perform a pull state by state
-      dflist <- lapply(unique(state), get_county_geo, county_df, acag)
+    #Perform a pull state by state
+    dflist <- lapply(st, get_county_geo, tract_df, level, acag)
 
-      # Convert list of dataframes to dataframe
-      ACAG_pm_dat_County <- bind_rows(dflist)
+    # Convert list of dataframes to dataframe
+    ACAG_pm_dat_County <- dplyr::bind_rows(dflist)
 
-      return(ACAG_pm_dat_County)
-    } else{
-      stop("Improper input, unrecognized county")
-    }
+    return(ACAG_pm_dat_County)
+
   }
 }

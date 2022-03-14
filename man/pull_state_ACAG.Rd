@@ -4,10 +4,14 @@
 \alias{pull_state_ACAG}
 \title{State level particulate matter data}
 \usage{
-pull_state_ACAG(year)
+pull_state_ACAG(year, level, state = c())
 }
 \arguments{
 \item{year, }{numeric object representing a selected year}
+
+\item{level, }{character string representing desired granularity of pull}
+
+\item{state, }{character vector of selected states}
 }
 \value{
 Dataframe object broken down by state with mean area-weighted PM2.5
@@ -20,5 +24,6 @@ earlier are available as a pull combining PM2.5 raster files and tigris
 shape files.
 }
 \examples{
-acag_pm_dat_state <- pull_state_ACAG(year = 2016)
+acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
+acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("AL", "AR", "AZ"))
 }
