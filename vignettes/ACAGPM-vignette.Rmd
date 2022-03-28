@@ -22,43 +22,77 @@ Particulate Matter (PM2.5) is a term referring to microscopic particles, not gre
 
 ## Available Data
 
-This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with *tigris* shape file data at 3 different levels for a variety of years. Those three levels are as follows:
+This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with *tigris* shape file data at 3 different granularities for a variety of years. Those three granularities are as follows:
 
-1. State, pulled at a nationwide granularity
-2. County, pulled at a statewide granularity
-3. Census Tract, pulled at a countywide granularity
+1. State
+2. County
+3. Census Tract
 
-Years 2015 through 2018 are included within the package, while years 2014 and prior are available as a pull combining PM2.5 raster files and *tigris* shape files. Data is returned in csv format, including the fields GEOID, NAME, and Particulate.Matter. An additional field is included for state and county pulls, representing the states or counties chosen by the user, respectively.
+Years 2015 through 2018 are included within the package, while years 2014 and prior are available as a pull combining PM2.5 raster files and *tigris* shape files. Data is returned in csv format, including the fields GEOID, NAME, and Particulate.Matter. An additional field is included for state and county pulls, representing the states or counties chosen by the user, respectively. Each granularity can be pulled at the level of the granularity and above.
 
-The PM2.5 levels are the mean area-weighted PM2.5 values for a select area.
+![](images/level.png)
+
+The PM2.5 levels are the mean area-weighted PM2.5 values for a select geography, calculated as follows.
+
+### Step 1: Projection
+
+In order to calculate particulate matter concentrations for a specific geography, the raster and shapefiles must first be combined via projection. Projection takes place as follows.
+1. Pull the shape file for desired geography
+1. Crop the raster file to the shape file of the geography
+1. Project the raster file's values onto the shape file
+
+An example of projection for Census Tract 123 of Providence County, Rhode Island is shown below.
+
+![](images/projection.png)
+
+### Step 2: Area-Weighted Mean
+
+The particulate matter value assigned to a particular geography is calculated via area-weighted mean. Some things to note:
+* PM Concentrations are the PM values found in a grid block
+* Weight is the area of a grid block contained in the geography, divided by the total area of the geography
+* Exact value is found by summing the PM Concentrations multiplied by the corresponding weights, then dividing that sum by the sum of all weights.
+
+An example of a calculation for Census Tract 123 of Providence County, Rhode Island is shown below.
+
+![](images/calculation.png)
 
 **Note: Alaska and Hawaii are not available.**
 
 ## How to Use
 
-### State: pull_state_ACAG(year)
+### State: pull_state_ACAG(year, level, state = c())
 
-Pulls nationwide data for a given year, broken down by available states with PM2.5 levels.
+Pulls national or state data for a given year, broken down by available states with PM2.5 concentrations.
 
 ```{r}
-state_pm <- ACAGPM::pull_state_ACAG(year = 2016)
+state_pm <- ACAGPM::pull_state_ACAG(year = 2016, level = "State", state = c(22, 44, 45))
 head(state_pm)
 ```
 
-### County: pull_county_ACAG(year, state)
+### County: pull_county_ACAG(year, level, state = c(), county_state = c())
 
-Pulls statewide data for a given year, broken down by counties with PM2.5 levels.
+Pulls national, state, or county data for a given year, broken down by counties with PM2.5 concentrations.
 
 ```{r}
-county_pm <- ACAGPM::pull_county_ACAG(year = 2016, state = c("AL", "AR", "AZ"))
+county_pm <- ACAGPM::pull_county_ACAG(year = 2016, level = "County", county_state = c(45001, 22001, 44001))
 head(county_pm)
 ```
 
-### Census Tract: pull_tract_ACAG(year, county_state)
+### Census Tract: pull_tract_ACAG(year, level, state = c(), county_state = c(), tract_county_state = c())
 
-Pulls countywide data for a given year, broken down by census tracts with PM2.5 levels.
+Pulls national, state, county, or tract data for a given year, broken down by census tracts with PM2.5 concentrations.
 
 ```{r}
-tract_pm <- ACAGPM::pull_tract_ACAG(year = 2016, county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
+tract_pm <- ACAGPM::pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c(45001950200, 45001950300, 45001950600))
 head(tract_pm)
+```
+
+
+### Additional: lookup_GEOID(state = NULL, county = NULL, tract = NULL)
+
+Pulls the GEOID corresponding to the name of a geography.
+
+```{r}
+state_id <- ACAGPM::lookup_GEOID(tract = "9502, Abbeville, South Carolina")
+print(state_id)
 ```

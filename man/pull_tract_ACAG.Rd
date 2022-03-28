@@ -15,28 +15,27 @@ pull_tract_ACAG(
 \arguments{
 \item{year, }{numeric object representing a selected year}
 
-\item{level, }{character string representing desired granularity of pull}
+\item{level, }{character string representing desired level of pull}
 
-\item{state, }{character vector of selected states}
+\item{state, }{numeric vector of selected states via GEOID}
 
-\item{county_state, }{character vector of selected counties}
+\item{county_state, }{numeric vector of selected counties via GEOID}
 
-\item{tract_county_state, }{character vector of selected tracts}
+\item{tract_county_state, }{numeric vector of selected tracts via GEOID}
 }
 \value{
 Dataframe object broken down by census tracts with
-mean area-weighted PM2.5 values. If input year is
-unavailable, returns an error.
+mean area-weighted PM2.5 values.
 }
 \description{
-Pulls PM2.5 data at a census tract level, either internally or as a new pull. Years
-2015 through 2018 are pre-available within the package, but years 2014 and
-earlier are available as a pull combining PM2.5 raster files and tigris
-shape files.
+Pulls PM2.5 data at a census tract granularity with level selections, either
+internally or as a new pull. Years 2015 through 2018 are pre-available within
+the package, but years 2014 and earlier are available as a pull combining
+PM2.5 raster files and tigris shape files.
 }
 \examples{
 acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "National")
-acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "State", state = c("AL", "AK", "AZ"))
-acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "County", county_state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
-acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c("Census Tract 9502_Abbeville County_SC", "Census Tract 9503_Abbeville County_SC", "Census Tract 9506_Abbeville County_SC"))
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "County", county_state = c(45001, 22001, 51001))
+acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c(45001950200, 45001950300, 45001950600))
 }

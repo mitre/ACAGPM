@@ -9,21 +9,21 @@ pull_state_ACAG(year, level, state = c())
 \arguments{
 \item{year, }{numeric object representing a selected year}
 
-\item{level, }{character string representing desired granularity of pull}
+\item{level, }{character string representing desired level of pull}
 
-\item{state, }{character vector of selected states}
+\item{state, }{numeric vector of selected states via GEOID}
 }
 \value{
 Dataframe object broken down by state with mean area-weighted PM2.5
-values. If input year is unavailable, returns an error.
+values.
 }
 \description{
-Pulls PM2.5 data at a state level, either internally or as a new pull. Years
-2015 through 2018 are pre-available within the package, but years 2014 and
-earlier are available as a pull combining PM2.5 raster files and tigris
-shape files.
+Pulls PM2.5 data at a state granularity with level selections, either
+internally or as a new pull. Years 2015 through 2018 are pre-available within
+the package, but years 2014 and earlier are available as a pull combining
+PM2.5 raster files and tigris shape files.
 }
 \examples{
 acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
-acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("AL", "AR", "AZ"))
+acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
 }

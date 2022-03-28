@@ -19,7 +19,7 @@ get_pm_data <- function(state, new_acag){
   acag_crop <- raster::crop(new_acag, new_geo_sp, snap = "out")
 
   # Convert spatial object with PM2.5 levels to dataframe, including spatial coordinates
-  acag_df <- as.data.frame(acag_crop, xy = T)
+  acag_df <- data.frame(raster::rasterToPoints(acag_crop))
 
   # Convert spatial object with PM2.5 levels to SpatialPolygonsDataFrame
   acag_sp <- as(acag_crop, "SpatialPolygonsDataFrame")
@@ -64,7 +64,7 @@ get_national_geo <- function(st, acag){
 
   # Load shapefile for given state
   geo <- tigris::states(cb = T) %>%
-    dplyr::filter(STUSPS %in% st)
+    dplyr::filter(GEOID %in% st)
 
   # CRS needs to line up
   new_acag <- raster::projectRaster(acag, crs = raster::crs(geo))
@@ -94,21 +94,21 @@ get_national_geo <- function(st, acag){
 
 #' State level particulate matter data
 #'
-#' Pulls PM2.5 data at a state level, either internally or as a new pull. Years
-#' 2015 through 2018 are pre-available within the package, but years 2014 and
-#' earlier are available as a pull combining PM2.5 raster files and tigris
-#' shape files.
+#' Pulls PM2.5 data at a state granularity with level selections, either
+#' internally or as a new pull. Years 2015 through 2018 are pre-available within
+#' the package, but years 2014 and earlier are available as a pull combining
+#' PM2.5 raster files and tigris shape files.
 #'
 #' @param year, numeric object representing a selected year
-#' @param level, character string representing desired granularity of pull
-#' @param state, character vector of selected states
+#' @param level, character string representing desired level of pull
+#' @param state, numeric vector of selected states via GEOID
 #'
 #' @return Dataframe object broken down by state with mean area-weighted PM2.5
-#' values. If input year is unavailable, returns an error.
+#' values.
 #'
 #' @examples
 #' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
-#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("AL", "AR", "AZ"))
+#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
 #' @export
 pull_state_ACAG <- function(year, level, state = c()){
 
@@ -116,7 +116,7 @@ pull_state_ACAG <- function(year, level, state = c()){
   available_years <- c(2015, 2016, 2017, 2018)
 
   # Does not include Alaska or Hawaii!
-  states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
+  state_lookup <- read.csv(system.file(file.path("data", "input", "state_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
 
   file_path <- system.file(file.path("data", "output", year, "state", "acag_pm_dat_US.csv"),
                            package = "ACAGPM")
@@ -129,9 +129,9 @@ pull_state_ACAG <- function(year, level, state = c()){
     # If level is state, pulls selected states from data. If invalid state is
     # entered, an error is thrown.
     if (level == "State"){
-      if (all(state %in% states)){
+      if (all(state %in% state_lookup$GEOID.STATE)){
         acag_pm_dat_US <- acag_pm_dat_US %>%
-          dplyr::filter(NAME %in% state.name[match(state, state.abb)])
+          dplyr::filter(GEOID %in% state)
       } else{
         stop("Improper input, unrecognized state")
       }
@@ -158,9 +158,9 @@ pull_state_ACAG <- function(year, level, state = c()){
     # If level is state, sets pull to selected states. If invalid state is
     # entered, an error is thrown.
     if (level == "National"){
-      st <- states
+      st <- state_lookup$GEOID.STATE
     } else if (level == "State"){
-      if (all(state %in% states)){
+      if (all(state %in% state_lookup$GEOID.STATE)){
         st <- state
       } else{
         stop("Improper input, unrecognized state")
