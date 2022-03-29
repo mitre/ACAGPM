@@ -65,7 +65,7 @@ lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
       stop("Invalid input, corresponding GEOID not found.")
     }
 
-    return(geoid)
+    return(as.double(geoid))
 
   } else if (is.character(county) && length(county) == 1){
     county_lookup <- read.csv(system.file(file.path("data", "input", "county_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
@@ -89,7 +89,7 @@ lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
       stop("Invalid input, corresponding GEOID not found.")
     }
 
-    return(geoid)
+    return(as.double(geoid))
 
   } else if (is.character(tract) && length(tract) == 1){
     tract_lookup <- read.csv(system.file(file.path("data", "input", "tract_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
@@ -118,7 +118,7 @@ lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
       stop("Invalid input, corresponding GEOID not found.")
     }
 
-    return(geoid)
+    return(as.double(geoid))
 
   } else {
     stop("No input entered.")

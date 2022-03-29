@@ -94,7 +94,11 @@ get_state_geo <- function(st, acag, county_df){
     setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
 
   # Perform parallel computation, which pulls PM2.5 levels for each county in the state
-  new_geo.list_PM <- parallel::mclapply(new_geo.list, get_county_pm, new_acag = new_acag, mc.cores = 1)
+  nodes <- parallel::detectCores()
+  cl <- parallel::makeCluster(nodes)
+  doParallel::registerDoParallel(cl)
+
+  new_geo.list_PM <- plyr::llply(new_geo.list, get_county_pm, new_acag = new_acag, .parallel = TRUE, .paropts = list(.packages = c("raster", "sf")))
   pm_data <- do.call("rbind", new_geo.list_PM) # Back to df
 
   # Pull desired columns

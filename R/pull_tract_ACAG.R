@@ -207,8 +207,12 @@ get_county_geo <- function(st, tract_df, level, acag) {
   })
 
   # Compute mean area concentration for CTs
+  nodes <- parallel::detectCores()
+  cl <- parallel::makeCluster(nodes)
+  doParallel::registerDoParallel(cl)
+
   final_geo <- lapply(new_geo.list, function(df){
-    lapply(df, get_census_pm, new_acag)
+    plyr::llply(df, get_census_pm, new_acag = new_acag, .parallel = TRUE, .paropts = list(.packages = c("raster", "sf")))
   })
 
   # Combine into single df

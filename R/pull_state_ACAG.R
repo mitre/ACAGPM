@@ -79,7 +79,11 @@ get_national_geo <- function(st, acag){
     setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
 
   # Perform parallel computation
-  new_geo.list_PM <- parallel::mclapply(new_geo.list, get_pm_data, new_acag = new_acag)
+  nodes <- parallel::detectCores()
+  cl <- parallel::makeCluster(nodes)
+  doParallel::registerDoParallel(cl)
+
+  new_geo.list_PM <- plyr::llply(new_geo.list, get_pm_data, new_acag = new_acag, .parallel = TRUE, .paropts = list(.packages = c("raster", "sf")))
   pm_data <- new_geo.list_PM %>% dplyr::bind_rows() # Back to df
 
   # Pull desired columns
@@ -128,13 +132,17 @@ pull_state_ACAG <- function(year, level, state = c()){
 
     # If level is state, pulls selected states from data. If invalid state is
     # entered, an error is thrown.
-    if (level == "State"){
+    if (level == "National"){
+
+    } else if (level == "State"){
       if (all(state %in% state_lookup$GEOID.STATE)){
         acag_pm_dat_US <- acag_pm_dat_US %>%
           dplyr::filter(GEOID %in% state)
       } else{
         stop("Improper input, unrecognized state")
       }
+    } else{
+      stop("Improper input, unrecognized level")
     }
     return(acag_pm_dat_US)
   } else{
