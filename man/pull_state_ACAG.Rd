@@ -25,5 +25,5 @@ PM2.5 raster files and tigris shape files.
 }
 \examples{
 acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
-acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
+acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
 }

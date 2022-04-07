@@ -1,4 +1,4 @@
-
+#
 # states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
 #
 # state_lookup <- tigris::states() %>%
@@ -25,8 +25,8 @@
 # tract_lookup_temp <- tract_lookup %>%
 #   dplyr::bind_rows() %>%
 #   dplyr::left_join(state_lookup %>% select(c(GEOID, STATEFP, STUSPS, NAME)), by = "STATEFP", suffix = c(".TRACT", ".STATE")) %>%
-#   dplyr::left_join(county_lookup %>% select(c(GEOID, STATEFP, COUNTYFP, NAME, NAMELSAD)), by = c("STATEFP", "COUNTYFP"), suffix = c(".TRACT", ".COUNTY"))
-
+#   dplyr::left_join(county_lookup %>% select(c(GEOID.COUNTY, STATEFP, COUNTYFP, NAME.COUNTY, NAMELSAD)), by = c("STATEFP", "COUNTYFP"), suffix = c(".TRACT", ".COUNTY"))
+#
 
 
 ## EXTERNAL
@@ -50,7 +50,7 @@
 #' @export
 lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
   if (is.character(state) && length(state) == 1){
-    state_lookup <- read.csv(system.file(file.path("data", "input", "state_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
+    state_lookup <- read.csv(system.file(file.path("data", "input", "state_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "GEOID" = "character"))
 
     state_split <- unlist(strsplit(state, split = "\\s*,\\s*"))
     if (length(state_split) != 1){
@@ -58,17 +58,17 @@ lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
     }
 
     geoid <- state_lookup %>%
-      dplyr::filter(STUSPS == state | NAME.STATE == state) %>%
-      dplyr::pull(GEOID.STATE)
+      dplyr::filter(STUSPS == state | NAME == state) %>%
+      dplyr::pull(GEOID)
 
     if (length(geoid) == 0){
       stop("Invalid input, corresponding GEOID not found.")
     }
 
-    return(as.double(geoid))
+    return(geoid)
 
   } else if (is.character(county) && length(county) == 1){
-    county_lookup <- read.csv(system.file(file.path("data", "input", "county_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
+    county_lookup <- read.csv(system.file(file.path("data", "input", "county_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "COUNTYFP" = "character", "GEOID.COUNTY" = "character", "GEOID.STATE" = "character"))
 
     county_split <- unlist(strsplit(county, split = "\\s*,\\s*"))
     if (length(county_split) != 2){
@@ -80,19 +80,19 @@ lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
 
     geoid <- county_lookup %>%
       dplyr::filter((STUSPS == st & NAME.COUNTY == co) |
-               (STUSPS == st & NAMELSAD.COUNTY == co) |
+               (STUSPS == st & NAMELSAD == co) |
                (NAME.STATE == st & NAME.COUNTY == co) |
-               (NAME.STATE == st & NAMELSAD.COUNTY == co)) %>%
+               (NAME.STATE == st & NAMELSAD == co)) %>%
       dplyr::pull(GEOID.COUNTY)
 
     if (length(geoid) == 0){
       stop("Invalid input, corresponding GEOID not found.")
     }
 
-    return(as.double(geoid))
+    return(geoid)
 
   } else if (is.character(tract) && length(tract) == 1){
-    tract_lookup <- read.csv(system.file(file.path("data", "input", "tract_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
+    tract_lookup <- read.csv(system.file(file.path("data", "input", "tract_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "COUNTYFP" = "character", "GEOID.TRACT" = "character", "NAME.TRACT" = "character", "GEOID.STATE" = "character", "GEOID.COUNTY" = "character"))
 
     tract_split <- unlist(strsplit(tract, split = "\\s*,\\s*"))
     if (length(tract_split) != 3){
@@ -118,7 +118,7 @@ lookup_GEOID <- function(state = NULL, county = NULL, tract = NULL) {
       stop("Invalid input, corresponding GEOID not found.")
     }
 
-    return(as.double(geoid))
+    return(geoid)
 
   } else {
     stop("No input entered.")

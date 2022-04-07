@@ -112,7 +112,7 @@ get_national_geo <- function(st, acag){
 #'
 #' @examples
 #' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
-#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
+#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
 #' @export
 pull_state_ACAG <- function(year, level, state = c()){
 
@@ -120,7 +120,7 @@ pull_state_ACAG <- function(year, level, state = c()){
   available_years <- c(2015, 2016, 2017, 2018)
 
   # Does not include Alaska or Hawaii!
-  state_lookup <- read.csv(system.file(file.path("data", "input", "state_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
+  state_lookup <- read.csv(system.file(file.path("data", "input", "state_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "GEOID" = "character"))
 
   file_path <- system.file(file.path("data", "output", year, "state", "acag_pm_dat_US.csv"),
                            package = "ACAGPM")
@@ -128,14 +128,14 @@ pull_state_ACAG <- function(year, level, state = c()){
   # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   if (year %in% available_years){
-    acag_pm_dat_US <- read.csv(file_path)
+    acag_pm_dat_US <- read.csv(file_path, colClasses = c("GEOID" = "character"))
 
     # If level is state, pulls selected states from data. If invalid state is
     # entered, an error is thrown.
     if (level == "National"){
 
     } else if (level == "State"){
-      if (all(state %in% state_lookup$GEOID.STATE)){
+      if (all(state %in% state_lookup$GEOID)){
         acag_pm_dat_US <- acag_pm_dat_US %>%
           dplyr::filter(GEOID %in% state)
       } else{
@@ -166,9 +166,9 @@ pull_state_ACAG <- function(year, level, state = c()){
     # If level is state, sets pull to selected states. If invalid state is
     # entered, an error is thrown.
     if (level == "National"){
-      st <- state_lookup$GEOID.STATE
+      st <- state_lookup$GEOID
     } else if (level == "State"){
-      if (all(state %in% state_lookup$GEOID.STATE)){
+      if (all(state %in% state_lookup$GEOID)){
         st <- state
       } else{
         stop("Improper input, unrecognized state")

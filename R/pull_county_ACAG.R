@@ -72,7 +72,7 @@ get_state_geo <- function(st, acag, county_df){
 
   # Load shapefile for counties in given state
   new_geo <-
-    if (st != "DC") {
+    if (st != "11") {
       tigris::counties(st) %>%
         dplyr::mutate(INTPTLAT = as.numeric(INTPTLAT),
                INTPTLON = as.numeric(INTPTLON))
@@ -104,7 +104,7 @@ get_state_geo <- function(st, acag, county_df){
   # Pull desired columns
   pm_data <- as.data.frame(pm_data)
   pm_data <-
-    if (st != "DC") {
+    if (st != "11") {
       pm_data %>%
         dplyr::select(STATEFP, GEOID, NAMELSAD, Particulate.Matter)
     } else {
@@ -134,15 +134,15 @@ get_state_geo <- function(st, acag, county_df){
 #'
 #' @examples
 #' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "National")
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "County", county_state = c(45001, 22001, 51001))
+#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
+#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "County", county_state = c("45001", "22001", "51001"))
 #' @export
 pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
 
   # Pre-available years of data
   available_years <- c(2015, 2016, 2017, 2018)
 
-  county_lookup <- read.csv(system.file(file.path("data", "input", "county_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
+  county_lookup <- read.csv(system.file(file.path("data", "input", "county_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "COUNTYFP" = "character", "GEOID.COUNTY" = "character", "GEOID.STATE" = "character"))
 
   county_df = NULL
 
@@ -179,7 +179,7 @@ pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
 
   # Initialized dataframe; do we need this?
   ACAG_pm_dat_County <- data.frame(county_state = character(),
-                                   GEOID = numeric(),
+                                   GEOID = character(),
                                    NAME = character(),
                                    Particulate.Matter = numeric())
 
@@ -192,7 +192,7 @@ pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
       dflist <- lapply(st.STUSPS, function(x){
         # Pull csv for state
         tempdf <- read.csv(system.file(file.path("data", "output", year, "county", paste0("acag_pm_dat_", x, ".csv")),
-                                       package = "ACAGPM"))
+                                       package = "ACAGPM"), colClasses = c("GEOID" = "character"))
 
         if (level == "County"){
           tempdf <- tempdf %>%

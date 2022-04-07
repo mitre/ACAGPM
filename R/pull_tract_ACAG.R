@@ -29,7 +29,7 @@ save_data <- function(df, state){
 
     # Select desired columns
     pm_data <-
-      if (state != "DC") {
+      if (state != "11") {
         pm_data %>%
           dplyr::select(GEOID, NAMELSAD, Particulate.Matter)
       } else {
@@ -128,7 +128,7 @@ get_census_geo <- function(cty_row, st, level, tract_df.st) {
   }
 
   # Choose name column
-  name_col <- if (st != "DC") {
+  name_col <- if (st != "11") {
     "NAMELSAD"
   } else {
     "NAME"
@@ -164,7 +164,7 @@ get_county_geo <- function(st, tract_df, level, acag) {
   # Load shapefile for counties in given state
 
   geo <-
-    if (st != "DC") {
+    if (st != "11") {
       tigris::counties(st) %>%
         dplyr::mutate(INTPTLAT = as.numeric(INTPTLAT),
                 INTPTLON = as.numeric(INTPTLON))
@@ -242,16 +242,16 @@ get_county_geo <- function(st, tract_df, level, acag) {
 #'
 #' @examples
 #' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "National")
-#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "State", state = c(1, 5, 4))
-#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "County", county_state = c(45001, 22001, 51001))
-#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c(45001950200, 45001950300, 45001950600))
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "County", county_state = c("45001", "22001", "51001"))
+#' acag_pm_dat_tract <- pull_tract_ACAG(year = 2016, level = "Tract", tract_county_state = c("45001950200", "45001950300", "45001950600"))
 #' @export
 pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_county_state = c()){
 
   # Pre-available years of data
   available_years <- c(2015, 2016, 2017, 2018)
 
-  tract_lookup <- read.csv(system.file(file.path("data", "input", "tract_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8")
+  tract_lookup <- read.csv(system.file(file.path("data", "input", "tract_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "COUNTYFP" = "character", "GEOID.TRACT" = "character", "NAME.TRACT" = "character", "GEOID.STATE" = "character", "GEOID.COUNTY" = "character"))
 
   tract_df <- NULL
 
@@ -325,7 +325,7 @@ pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_
 
   # Initialized dataframe; do we need this?
   ACAG_pm_dat_County <- data.frame(tract_county_state = character(),
-                                  GEOID = numeric(),
+                                  GEOID = character(),
                                   NAME = character(),
                                   Particulate.Matter = numeric())
 
@@ -337,7 +337,7 @@ pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_
     # Pulls selected data as list of dataframes
     dflist <- lapply(county_state.name, function(x){
       # Pull csv for county
-      tempdf <- read.csv(system.file(file.path("data", "output", year, "tract", paste0("acag_pm_dat_", x, ".csv")), package = "ACAGPM"))
+      tempdf <- read.csv(system.file(file.path("data", "output", year, "tract", paste0("acag_pm_dat_", x, ".csv")), package = "ACAGPM"), colClasses = c("GEOID" = "character"))
 
       if (level == "Tract"){
         tempdf <- tempdf %>%
