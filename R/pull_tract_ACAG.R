@@ -63,6 +63,8 @@ save_data <- function(df, state){
 #' @noRd
 get_census_pm <- function(census, new_acag) {
 
+  sf::sf_use_s2(use_s2 = FALSE)
+
   # Convert shapefile to spatial object
   new_geo_sp <- as(census, "Spatial")
 
@@ -124,7 +126,7 @@ get_census_geo <- function(cty_row, st, level, tract_df.st) {
 
   if (level == "Tract"){
     county_geo <- county_geo %>%
-      dplyr::filter(as.numeric(GEOID) %in% tract_county_state)
+      dplyr::filter(GEOID %in% tract_df.st$tract_county_state)
   }
 
   # Choose name column
@@ -185,7 +187,7 @@ get_county_geo <- function(st, tract_df, level, acag) {
   #   setNames(split(geo, seq(nrow(geo))), geo[[name_col]])
   # ONLY THING LEFT TO ADJUST;;; IF LEFT AS IS, FIX SAVE_DATA
   cty_row.list <-
-    setNames(split(geo, seq(nrow(geo))), as.numeric(geo[["COUNTYFP"]]))
+    setNames(split(geo, seq(nrow(geo))), geo[["COUNTYFP"]])
 
   # Filter to selected counties
   if (level == "County" || level == "Tract"){
@@ -278,20 +280,13 @@ pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_
   } else if (level == "County"){
     if (all(county_state %in% unique(tract_lookup$GEOID.COUNTY))){
 
-      # Creates vector containing states chosen
-      state <- tract_lookup %>%
-        dplyr::filter(GEOID.COUNTY %in% county_state) %>%
-        dplyr::pull(STATEFP)
-
-      # Creates vector containing counties chosen
-      county <- tract_lookup %>%
-        dplyr::filter(GEOID.COUNTY %in% county_state) %>%
-        dplyr::pull(COUNTYFP)
-
       # Dataframe of user input and additional information
-      tract_df <- cbind.data.frame(county, state, county_state)
+      tract_df <- tract_lookup %>%
+        dplyr::filter(GEOID.COUNTY %in% county_state) %>%
+        dplyr::select(COUNTYFP, STATEFP, GEOID.COUNTY) %>%
+        dplyr::rename(county = COUNTYFP, state = STATEFP, county_state = GEOID.COUNTY)
 
-      st <- unique(state)
+      st <- unique(tract_df$state)
 
       county_state.name <- unique(tract_lookup %>% dplyr::filter(GEOID.COUNTY %in% county_state) %>% dplyr::mutate(temp = paste0(NAMELSAD.COUNTY, "_", STUSPS)) %>% dplyr::pull(temp))
     } else{
@@ -300,20 +295,13 @@ pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_
   } else if (level == "Tract"){
     if (all(tract_county_state %in% tract_lookup$GEOID.TRACT)){
 
-      # Creates vector containing states chosen
-      state <- tract_lookup %>%
-        dplyr::filter(GEOID.TRACT %in% tract_county_state) %>%
-        dplyr::pull(STATEFP)
-
-      # Creates vector containing counties chosen
-      county <- tract_lookup %>%
-        dplyr::filter(GEOID.TRACT %in% tract_county_state) %>%
-        dplyr::pull(COUNTYFP)
-
       # Dataframe of user input and additional information
-      tract_df <- cbind.data.frame(county, state, tract_county_state)
+      tract_df <- tract_lookup %>%
+        dplyr::filter(GEOID.TRACT %in% tract_county_state) %>%
+        dplyr::select(COUNTYFP, STATEFP, GEOID.TRACT) %>%
+        dplyr::rename(county = COUNTYFP, state = STATEFP, tract_county_state = GEOID.TRACT)
 
-      st <- unique(state)
+      st <- unique(tract_df$state)
 
       county_state.name <- unique(tract_lookup %>% dplyr::filter(GEOID.TRACT %in% tract_county_state) %>% dplyr::mutate(temp = paste0(NAMELSAD.COUNTY, "_", STUSPS)) %>% dplyr::pull(temp))
     } else{

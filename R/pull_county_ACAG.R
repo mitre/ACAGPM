@@ -11,6 +11,8 @@
 #' @noRd
 get_county_pm <- function(census, new_acag){
 
+  sf::sf_use_s2(use_s2 = FALSE)
+
   # Convert shapefile to spatial object
   new_geo_sp <- as(census, "Spatial")
 
@@ -86,7 +88,7 @@ get_state_geo <- function(st, acag, county_df){
   }
 
   # CRS needs to line up
-  new_acag <- raster::projectRaster(acag, crs = crs(new_geo))
+  new_acag <- raster::projectRaster(acag, crs = raster::crs(new_geo))
   new_acag@data@names <- "Value"
 
   # Convert df to a list to be able to parallelize in mclapply
@@ -160,14 +162,12 @@ pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
     if (all(county_state %in% county_lookup$GEOID.COUNTY)){
 
       # Creates vector containing states chosen
-      state <- county_lookup %>%
+      county_df <- county_lookup %>%
         dplyr::filter(GEOID.COUNTY %in% county_state) %>%
-        dplyr::pull(GEOID.STATE)
+        dplyr::select(GEOID.COUNTY, GEOID.STATE) %>%
+        dplyr::rename(county_state = GEOID.COUNTY, state = GEOID.STATE)
 
-      # Dataframe of user input and additional information
-      county_df <- cbind.data.frame(state, county_state)
-
-      st <- unique(state)
+      st <- unique(county_df$state)
       st.STUSPS <- unique(county_lookup %>% dplyr::filter(GEOID.STATE %in% st) %>% dplyr::pull(STUSPS))
 
     } else{

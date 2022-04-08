@@ -12,6 +12,8 @@
 #' @noRd
 get_pm_data <- function(state, new_acag){
 
+  sf::sf_use_s2(use_s2 = FALSE)
+
   # Converts shapefile to spatial object
   new_geo_sp <- as(state, "Spatial")
 
