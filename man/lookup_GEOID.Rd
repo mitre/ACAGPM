@@ -7,11 +7,11 @@
 lookup_GEOID(state = NULL, county = NULL, tract = NULL)
 }
 \arguments{
-\item{state, }{character string of selected state}
+\item{state, }{character string of selected state. Full name or abbreviation.}
 
-\item{county, }{character string of selected county}
+\item{county, }{character string of selected county. Name with or without parish/county/borough classification.}
 
-\item{tract, }{character string of selected tract}
+\item{tract, }{character string of selected tract. Full name or just tract code.}
 }
 \value{
 Character string representing GEOID corresponding to user input.

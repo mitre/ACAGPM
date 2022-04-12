@@ -11,7 +11,7 @@ pull_state_ACAG(year, level, state = c())
 
 \item{level, }{character string representing desired level of pull}
 
-\item{state, }{numeric vector of selected states via GEOID}
+\item{state, }{character vector of selected states via GEOID}
 }
 \value{
 Dataframe object broken down by state with mean area-weighted PM2.5

@@ -55,7 +55,7 @@ get_county_pm <- function(census, new_acag){
 
 #' Function to compute county PM2.5 levels for each state
 #'
-#' @param st, character string representing a state
+#' @param st, character string representing a state's GEOID
 #' @param acag, rasterLayer object containing PM2.5 levels for the USA
 #' @param county_df, dataframe containing county data
 #'
@@ -128,8 +128,8 @@ get_state_geo <- function(st, acag, county_df){
 #'
 #' @param year, numeric object representing a selected year
 #' @param level, character string representing desired level of pull
-#' @param state, numeric vector of selected states via GEOID
-#' @param county_state, numeric vector of selected counties via GEOID
+#' @param state, character vector of selected states via GEOID
+#' @param county_state, character vector of selected counties via GEOID
 #'
 #' @return Dataframe object broken down by counties with mean
 #' area-weighted PM2.5 values.

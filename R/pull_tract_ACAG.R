@@ -1,12 +1,9 @@
 ## INTERNAL
 
-
-#Come back to this one
 #' Function to save final processed data as CSV and Rdata files to output
 #' directory
 #'
 #' @param df data frame of processed data
-#' @param county_name vector of county names (as strings) in state
 #' @param state string - state abbreviation
 #'
 #' @keywords internal
@@ -29,7 +26,7 @@ save_data <- function(df, state){
 
     # Select desired columns
     pm_data <-
-      if (state != "11") {
+      if (state != "DC") {
         pm_data %>%
           dplyr::select(GEOID, NAMELSAD, Particulate.Matter)
       } else {
@@ -129,13 +126,6 @@ get_census_geo <- function(cty_row, st, level, tract_df.st) {
       dplyr::filter(GEOID %in% tract_df.st$tract_county_state)
   }
 
-  # Choose name column
-  name_col <- if (st != "11") {
-    "NAMELSAD"
-  } else {
-    "NAME"
-  }
-
   # Initialize particulate matter column
   new_geo <- county_geo %>%
     dplyr::mutate(Particulate.Matter = NA_real_) %>%
@@ -147,7 +137,7 @@ get_census_geo <- function(cty_row, st, level, tract_df.st) {
 
 #' Function to compute census tract PM2.5 levels for each county
 #'
-#' @param st, character string representing a state
+#' @param st, character string representing a state's GEOID
 #' @param acag, rasterLayer object containing PM2.5 levels for the USA
 #'
 #' @return Dataframe object containing GEOID, census tract, and PM2.5 levels for
@@ -175,25 +165,15 @@ get_county_geo <- function(st, tract_df, level, acag) {
     }
 
 
-  # # Selecting name column
-  # name_col <- if (st != "DC") {
-  #   "NAMELSAD"
-  # } else {
-  #   "NAME"
-  # }
-  #
-  # # Convert to a list to be able to use with mclapply
-  # cty_row.list <-
-  #   setNames(split(geo, seq(nrow(geo))), geo[[name_col]])
-  # ONLY THING LEFT TO ADJUST;;; IF LEFT AS IS, FIX SAVE_DATA
+  # Convert to a list to be able to use with llply
   cty_row.list <-
-    setNames(split(geo, seq(nrow(geo))), geo[["COUNTYFP"]])
+    setNames(split(geo, seq(nrow(geo))), geo[["NAMELSAD"]])
 
   # Filter to selected counties
   if (level == "County" || level == "Tract"){
     cty_row.list <-
       cty_row.list[unlist(lapply(names(cty_row.list), function(x){
-        x %in% tract_df.st$county}))]
+        x %in% tract_df.st$county.name}))]
   }
 
   # Get census tract shape info
@@ -220,8 +200,12 @@ get_county_geo <- function(st, tract_df, level, acag) {
   # Combine into single df
   final_geo.df <- lapply(final_geo, dplyr::bind_rows)
 
+  state.name <- tigris::states() %>%
+    dplyr::filter(STATEFP == st) %>%
+    dplyr::pull(STUSPS)
+
   # Save
-  return(save_data(df = final_geo.df, state = st))
+  return(save_data(df = final_geo.df, state = state.name))
 }
 
 ## EXTERNAL
@@ -235,9 +219,9 @@ get_county_geo <- function(st, tract_df, level, acag) {
 #'
 #' @param year, numeric object representing a selected year
 #' @param level, character string representing desired level of pull
-#' @param state, numeric vector of selected states via GEOID
-#' @param county_state, numeric vector of selected counties via GEOID
-#' @param tract_county_state, numeric vector of selected tracts via GEOID
+#' @param state, character vector of selected states via GEOID
+#' @param county_state, character vector of selected counties via GEOID
+#' @param tract_county_state, character vector of selected tracts via GEOID
 #'
 #' @return Dataframe object broken down by census tracts with
 #' mean area-weighted PM2.5 values.
@@ -283,8 +267,8 @@ pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_
       # Dataframe of user input and additional information
       tract_df <- tract_lookup %>%
         dplyr::filter(GEOID.COUNTY %in% county_state) %>%
-        dplyr::select(COUNTYFP, STATEFP, GEOID.COUNTY) %>%
-        dplyr::rename(county = COUNTYFP, state = STATEFP, county_state = GEOID.COUNTY)
+        dplyr::select(COUNTYFP, STATEFP, GEOID.COUNTY, NAMELSAD.COUNTY) %>%
+        dplyr::rename(county = COUNTYFP, state = STATEFP, county_state = GEOID.COUNTY, county.name = NAMELSAD.COUNTY)
 
       st <- unique(tract_df$state)
 
@@ -298,8 +282,8 @@ pull_tract_ACAG <- function(year, level, state = c(), county_state = c(), tract_
       # Dataframe of user input and additional information
       tract_df <- tract_lookup %>%
         dplyr::filter(GEOID.TRACT %in% tract_county_state) %>%
-        dplyr::select(COUNTYFP, STATEFP, GEOID.TRACT) %>%
-        dplyr::rename(county = COUNTYFP, state = STATEFP, tract_county_state = GEOID.TRACT)
+        dplyr::select(COUNTYFP, STATEFP, GEOID.TRACT, NAMELSAD.COUNTY) %>%
+        dplyr::rename(county = COUNTYFP, state = STATEFP, tract_county_state = GEOID.TRACT, county.name = NAMELSAD.COUNTY)
 
       st <- unique(tract_df$state)
 

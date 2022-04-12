@@ -54,7 +54,7 @@ get_pm_data <- function(state, new_acag){
 #' Helper function to compute PM2.5 concentrations for every census tract for each
 #' state
 #'
-#' @param st, character string representing a state
+#' @param st, character string representing a state's GEOID
 #' @param acag, rasterLayer object containing PM2.5 levels for the USA
 #'
 #' @return Dataframe object containing GEOID, state, and PM2.5 levels for a
@@ -107,7 +107,7 @@ get_national_geo <- function(st, acag){
 #'
 #' @param year, numeric object representing a selected year
 #' @param level, character string representing desired level of pull
-#' @param state, numeric vector of selected states via GEOID
+#' @param state, character vector of selected states via GEOID
 #'
 #' @return Dataframe object broken down by state with mean area-weighted PM2.5
 #' values.
