@@ -68,23 +68,23 @@ get_state_geo <- function(st, acag, county_df){
 
   if (!is.null(county_df)){
     county_names <- county_df %>%
-      dplyr::filter(state == st) %>%
-      dplyr::pull(county_state)
+      dplyr::filter(.data$state == st) %>%
+      dplyr::pull(.data$county_state)
   }
 
   # Load shapefile for counties in given state
   new_geo <-
     if (st != "11") {
       tigris::counties(st) %>%
-        dplyr::mutate(INTPTLAT = as.numeric(INTPTLAT),
-               INTPTLON = as.numeric(INTPTLON))
+        dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
+               INTPTLON = as.numeric(.data$INTPTLON))
     } else {
       tigris::counties(st, cb = T)
     }
 
   if (!is.null(county_df)){
     new_geo <- new_geo %>%
-      dplyr::filter(GEOID %in% county_names)
+      dplyr::filter(.data$GEOID %in% county_names)
   }
 
   # CRS needs to line up
@@ -108,10 +108,10 @@ get_state_geo <- function(st, acag, county_df){
   pm_data <-
     if (st != "11") {
       pm_data %>%
-        dplyr::select(STATEFP, GEOID, NAMELSAD, Particulate.Matter)
+        dplyr::select(.data$STATEFP, .data$GEOID, .data$NAMELSAD, .data$Particulate.Matter)
     } else {
       pm_data %>%
-        dplyr::select(STATEFP, GEOID, NAME, Particulate.Matter)
+        dplyr::select(.data$STATEFP, .data$GEOID, .data$NAME, .data$Particulate.Matter)
     }
 
   return(pm_data)
@@ -124,51 +124,69 @@ get_state_geo <- function(st, acag, county_df){
 #' Pulls PM2.5 data at a county granularity with level selections, either
 #' internally or as a new pull. Years 2015 through 2018 are pre-available within
 #' the package, but years 2014 and earlier are available as a pull combining
-#' PM2.5 raster files and tigris shape files.
+#' PM2.5 raster files and tigris shape files. More information on external pulls
+#' contained in the vignette.
 #'
-#' @param year, numeric object representing a selected year
-#' @param level, character string representing desired level of pull
-#' @param state, character vector of selected states via GEOID
-#' @param county_state, character vector of selected counties via GEOID
+#' @param pull_type, character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"
+#' @param year, numeric object representing a selected year. Used if pull_type is "Internal"
+#' @param level, character string representing desired level of pull. "National", "State", or "County"
+#' @param state, character vector of selected states via GEOID. Used if level is "State"
+#' @param county_state, character vector of selected counties via GEOID. Used if level "County"
+#' @param acag, particulate matter raster object. Used if pull_type is "External"
 #'
 #' @return Dataframe object broken down by counties with mean
 #' area-weighted PM2.5 values.
 #'
 #' @examples
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "National")
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
-#' acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "County", county_state = c("45001", "22001", "51001"))
+#' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+#'                                        year = 2016,
+#'                                        level = "National")
+#' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+#'                                        year = 2016,
+#'                                        level = "State",
+#'                                        state = c("01", "05", "04"))
+#' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+#'                                        year = 2016,
+#'                                        level = "County",
+#'                                        county_state = c("45001", "22001", "51001"))
 #' @export
-pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
+pull_county_ACAG <- function(pull_type, year = NULL, level, state = c(), county_state = c(), acag = NULL){
 
   # Pre-available years of data
   available_years <- c(2015, 2016, 2017, 2018)
 
-  county_lookup <- read.csv(system.file(file.path("data", "input", "county_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "COUNTYFP" = "character", "GEOID.COUNTY" = "character", "GEOID.STATE" = "character"))
+  county_lookup <- NULL
+  load(system.file(file.path("extdata", "input", "county_lookup.RData"), package = "ACAGPM"))
 
   county_df = NULL
 
   if (level == "National"){
     st <- unique(county_lookup$STATEFP)
-    st.STUSPS <- unique(county_lookup %>% dplyr::filter(STATEFP %in% st) %>% dplyr::pull(STUSPS))
+    st.STUSPS <- unique(county_lookup %>% dplyr::filter(.data$STATEFP %in% st) %>% dplyr::pull(.data$STUSPS))
   } else if (level == "State"){
+    if (class(state) != "character"){
+      stop("Improper input, must be character")
+    }
     if (all(state %in% unique(county_lookup$STATEFP))){
       st <- state
-      st.STUSPS <- unique(county_lookup %>% dplyr::filter(STATEFP %in% st) %>% dplyr::pull(STUSPS))
+      st.STUSPS <- unique(county_lookup %>% dplyr::filter(.data$STATEFP %in% st) %>% dplyr::pull(.data$STUSPS))
     } else{
       stop("Improper input, unrecognized state")
     }
   } else if (level == "County"){
+    if (class(county_state) != "character"){
+      stop("Improper input, must be character")
+    }
     if (all(county_state %in% county_lookup$GEOID.COUNTY)){
 
       # Creates vector containing states chosen
       county_df <- county_lookup %>%
-        dplyr::filter(GEOID.COUNTY %in% county_state) %>%
-        dplyr::select(GEOID.COUNTY, GEOID.STATE) %>%
-        dplyr::rename(county_state = GEOID.COUNTY, state = GEOID.STATE)
+        dplyr::filter(.data$GEOID.COUNTY %in% county_state) %>%
+        dplyr::select(.data$GEOID.COUNTY, .data$GEOID.STATE) %>%
+        dplyr::rename(county_state = .data$GEOID.COUNTY, state = .data$GEOID.STATE)
 
       st <- unique(county_df$state)
-      st.STUSPS <- unique(county_lookup %>% dplyr::filter(GEOID.STATE %in% st) %>% dplyr::pull(STUSPS))
+      st.STUSPS <- unique(county_lookup %>% dplyr::filter(.data$GEOID.STATE %in% st) %>% dplyr::pull(.data$STUSPS))
 
     } else{
       stop("Improper input, unrecognized county")
@@ -177,26 +195,24 @@ pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
     stop("Improper input, unrecognized level")
   }
 
-  # Initialized dataframe; do we need this?
-  ACAG_pm_dat_County <- data.frame(county_state = character(),
-                                   GEOID = character(),
-                                   NAME = character(),
-                                   Particulate.Matter = numeric())
-
   # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   # Returns an error if unrecognized state is selected as input.
-  if (year %in% available_years){
+  if (pull_type == "Internal"){
 
+    if (year %in% available_years){
+    } else{
+      stop("Improper input, invalid year")
+    }
       # Pulls selected data as list of dataframes
       dflist <- lapply(st.STUSPS, function(x){
-        # Pull csv for state
-        tempdf <- read.csv(system.file(file.path("data", "output", year, "county", paste0("acag_pm_dat_", x, ".csv")),
-                                       package = "ACAGPM"), colClasses = c("GEOID" = "character"))
+        pm_data <- NULL
+        load(system.file(file.path("extdata", "output", year, "county", paste0("acag_pm_dat_", x, ".RData")), package = "ACAGPM"))
+        tempdf <- pm_data
 
         if (level == "County"){
           tempdf <- tempdf %>%
-            dplyr::filter(GEOID %in% county_state)
+            dplyr::filter(.data$GEOID %in% county_state)
         }
 
         # Add column with name of state
@@ -211,24 +227,14 @@ pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
 
       return(ACAG_pm_dat_State)
 
-  } else{
+  } else if (pull_type == "External"){
 
       # Pull PM2.5 for the given year
-      acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
-                                 package = "ACAGPM"))
+      acag <- acag
+      if (class(acag) != "RasterLayer"){
+        stop("Improper input, acag must be RasterLayer object")
+      }
       acag@data@names <- "Value"
-
-      ## Keeping these in case we want to define new_acag once
-      # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
-      # new_acag <- raster::raster(
-      #   file.path(
-      #     "data",
-      #     "input",
-      #     "acag_raw_data_files",
-      #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
-      #   ),
-      #   crs = crs_args)
-      # new_acag@data@names <- "Value"
 
       # Perform a pull state by state
       dflist <- lapply(st, get_state_geo, acag, county_df)
@@ -238,5 +244,7 @@ pull_county_ACAG <- function(year, level, state = c(), county_state = c()){
 
       return(ACAG_pm_dat_State)
 
+  } else{
+    stop("Improper input, pull_type must be Internal or External")
   }
 }

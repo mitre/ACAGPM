@@ -66,7 +66,7 @@ get_national_geo <- function(st, acag){
 
   # Load shapefile for given state
   geo <- tigris::states(cb = T) %>%
-    dplyr::filter(GEOID %in% st)
+    dplyr::filter(.data$GEOID %in% st)
 
   # CRS needs to line up
   new_acag <- raster::projectRaster(acag, crs = raster::crs(geo))
@@ -90,7 +90,7 @@ get_national_geo <- function(st, acag){
 
   # Pull desired columns
   pm_data <- as.data.frame(pm_data) %>%
-    dplyr::select(GEOID, NAME, Particulate.Matter)
+    dplyr::select(.data$GEOID, .data$NAME, .data$Particulate.Matter)
 
   return(pm_data)
 }
@@ -103,43 +103,72 @@ get_national_geo <- function(st, acag){
 #' Pulls PM2.5 data at a state granularity with level selections, either
 #' internally or as a new pull. Years 2015 through 2018 are pre-available within
 #' the package, but years 2014 and earlier are available as a pull combining
-#' PM2.5 raster files and tigris shape files.
+#' PM2.5 raster files and tigris shape files. More information on external pulls
+#' contained in the vignette.
 #'
-#' @param year, numeric object representing a selected year
-#' @param level, character string representing desired level of pull
-#' @param state, character vector of selected states via GEOID
+#' @param pull_type, character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"
+#' @param year, numeric object representing a selected year. Used if pull_type is "Internal"
+#' @param level, character string representing desired level of pull. "National" or "State"
+#' @param state, character vector of selected states via GEOID. Used if level is "State"
+#' @param acag, particulate matter raster object. Used if pull_type is "External"
 #'
 #' @return Dataframe object broken down by state with mean area-weighted PM2.5
 #' values.
 #'
 #' @examples
-#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "National")
-#' acag_pm_dat_state <- pull_state_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
+#' acag_pm_dat_state <- pull_state_ACAG(pull_type = "Internal",
+#'                                      year = 2016,
+#'                                      level = "National")
+#' acag_pm_dat_state <- pull_state_ACAG(pull_type = "Internal",
+#'                                      year = 2016,
+#'                                      level = "State",
+#'                                      state = c("01", "05", "04"))
+#' @importFrom utils read.csv
+#' @importFrom utils read.table
+#' @importFrom dplyr %>%
+#' @importFrom methods as
+#' @importFrom stats setNames
+#' @importFrom rlang .data
 #' @export
-pull_state_ACAG <- function(year, level, state = c()){
+pull_state_ACAG <- function(pull_type, year = NULL, level, state = c(), acag = NULL){
 
   # Pre-available years
   available_years <- c(2015, 2016, 2017, 2018)
 
   # Does not include Alaska or Hawaii!
-  state_lookup <- read.csv(system.file(file.path("data", "input", "state_lookup.csv"), package = "ACAGPM"), encoding = "UTF-8", colClasses = c("STATEFP" = "character", "GEOID" = "character"))
+  state_lookup <- NULL
+  load(system.file(file.path("extdata", "input", "state_lookup.RData"), package = "ACAGPM"))
 
-  file_path <- system.file(file.path("data", "output", year, "state", "acag_pm_dat_US.csv"),
+  # file_path <- system.file(file.path("extdata", "output", year, "state", "acag_pm_dat_US.csv"),
+  #                          package = "ACAGPM")
+  file_path <- system.file(file.path("extdata", "output", year, "state", "acag_pm_dat_US.RData"),
                            package = "ACAGPM")
 
   # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
-  if (year %in% available_years){
-    acag_pm_dat_US <- read.csv(file_path, colClasses = c("GEOID" = "character"))
+  if (pull_type == "Internal"){
+    if (year %in% available_years){
+    } else{
+      stop("Improper input, invalid year")
+    }
+
+    pm_data <- NULL
+    load(file_path)
+    acag_pm_dat_US <- pm_data
 
     # If level is state, pulls selected states from data. If invalid state is
     # entered, an error is thrown.
     if (level == "National"){
 
     } else if (level == "State"){
+      if (class(state) != "character"){
+        stop("Improper input, must be character")
+      }
+
+
       if (all(state %in% state_lookup$GEOID)){
         acag_pm_dat_US <- acag_pm_dat_US %>%
-          dplyr::filter(GEOID %in% state)
+          dplyr::filter(.data$GEOID %in% state)
       } else{
         stop("Improper input, unrecognized state")
       }
@@ -147,29 +176,22 @@ pull_state_ACAG <- function(year, level, state = c()){
       stop("Improper input, unrecognized level")
     }
     return(acag_pm_dat_US)
-  } else{
+  } else if (pull_type == "External"){
     # Pull PM2.5 data for the given year
-    acag <- raster::raster(system.file(file.path("data", "input", "acag_raw_data_files", paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")),
-                                       package = "ACAGPM"))
+    acag <- acag
+    if (class(acag) != "RasterLayer"){
+      stop("Improper input, acag must be RasterLayer object")
+    }
     acag@data@names <- "Value"
-
-    ## Keeping these in case we want to define new_acag once
-    # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
-    # new_acag <- raster::raster(
-    #   file.path(
-    #     "data",
-    #     "input",
-    #     "acag_raw_data_files",
-    #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
-    #   ),
-    #   crs = crs_args)
-    # new_acag@data@names <- "Value"
 
     # If level is state, sets pull to selected states. If invalid state is
     # entered, an error is thrown.
     if (level == "National"){
       st <- state_lookup$GEOID
     } else if (level == "State"){
+      if (class(state) != "character"){
+        stop("Improper input, must be character")
+      }
       if (all(state %in% state_lookup$GEOID)){
         st <- state
       } else{
@@ -183,6 +205,8 @@ pull_state_ACAG <- function(year, level, state = c()){
     acag_pm_dat_US <- get_national_geo(st = st, acag = acag)
 
     return(acag_pm_dat_US)
+  } else{
+    stop("Improper input, pull_type must be Internal or External")
   }
 
 }

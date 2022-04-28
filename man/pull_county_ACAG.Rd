@@ -4,16 +4,27 @@
 \alias{pull_county_ACAG}
 \title{County level particulate matter data}
 \usage{
-pull_county_ACAG(year, level, state = c(), county_state = c())
+pull_county_ACAG(
+  pull_type,
+  year = NULL,
+  level,
+  state = c(),
+  county_state = c(),
+  acag = NULL
+)
 }
 \arguments{
-\item{year, }{numeric object representing a selected year}
+\item{pull_type, }{character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"}
 
-\item{level, }{character string representing desired level of pull}
+\item{year, }{numeric object representing a selected year. Used if pull_type is "Internal"}
 
-\item{state, }{character vector of selected states via GEOID}
+\item{level, }{character string representing desired level of pull. "National", "State", or "County"}
 
-\item{county_state, }{character vector of selected counties via GEOID}
+\item{state, }{character vector of selected states via GEOID. Used if level is "State"}
+
+\item{county_state, }{character vector of selected counties via GEOID. Used if level "County"}
+
+\item{acag, }{particulate matter raster object. Used if pull_type is "External"}
 }
 \value{
 Dataframe object broken down by counties with mean
@@ -23,10 +34,19 @@ area-weighted PM2.5 values.
 Pulls PM2.5 data at a county granularity with level selections, either
 internally or as a new pull. Years 2015 through 2018 are pre-available within
 the package, but years 2014 and earlier are available as a pull combining
-PM2.5 raster files and tigris shape files.
+PM2.5 raster files and tigris shape files. More information on external pulls
+contained in the vignette.
 }
 \examples{
-acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "National")
-acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "State", state = c("01", "05", "04"))
-acag_pm_dat_county <- pull_county_ACAG(year = 2016, level = "County", county_state = c("45001", "22001", "51001"))
+acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+                                       year = 2016,
+                                       level = "National")
+acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+                                       year = 2016,
+                                       level = "State",
+                                       state = c("01", "05", "04"))
+acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+                                       year = 2016,
+                                       level = "County",
+                                       county_state = c("45001", "22001", "51001"))
 }

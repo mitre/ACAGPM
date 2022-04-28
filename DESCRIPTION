@@ -23,12 +23,18 @@ Imports:
     parallel,
     plyr,
     raster,
+    rlang,
     sf,
     tibble,
-    tidycensus
+    tidycensus,
+    tigris,
+    methods
 Suggests: 
     rmarkdown,
     knitr,
-    testthat
+    testthat,
+    devtools,
+    ggplot2,
+    gridExtra
 Config/testthat/edition: 3
 VignetteBuilder: knitr
