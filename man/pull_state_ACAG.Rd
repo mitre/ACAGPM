@@ -4,25 +4,36 @@
 \alias{pull_state_ACAG}
 \title{State level particulate matter data}
 \usage{
-pull_state_ACAG(year, state = c())
+pull_state_ACAG(pull_type, year = NULL, level, state = c(), acag = NULL)
 }
 \arguments{
-\item{year, }{numeric object representing a selected year}
+\item{pull_type, }{character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"}
 
-\item{state, }{character vector of selected states}
+\item{year, }{numeric object representing a selected year. Used if pull_type is "Internal"}
+
+\item{level, }{character string representing desired level of pull. "National" or "State"}
+
+\item{state, }{character vector of selected states via GEOID. Used if level is "State"}
+
+\item{acag, }{particulate matter raster object. Used if pull_type is "External"}
 }
 \value{
-Dataframe object broken down by counties in each state with mean
-area-weighted PM2.5 values. If the state field is empty, PM2.5 data for
-counties in all states is returned. If input year is unavailable, returns an
-error.
+Dataframe object broken down by state with mean area-weighted PM2.5
+values.
 }
 \description{
-Pulls PM2.5 data at a state level, either internally or externally. Years
-2015 through 2018 are pre-available within the package, but years ____
-through 2014 are available as an external pull.
+Pulls PM2.5 data at a state granularity with level selections, either
+internally or as a new pull. Years 2015 through 2018 are pre-available within
+the package, but years 2014 and earlier are available as a pull combining
+PM2.5 raster files and tigris shape files. More information on external pulls
+contained in the vignette.
 }
 \examples{
-pull_state_ACAG(year = 2016, state = c("AL", "AK", "AZ"))
-pull_state_ACAG(year = 2016)
+acag_pm_dat_state <- pull_state_ACAG(pull_type = "Internal",
+                                     year = 2016,
+                                     level = "National")
+acag_pm_dat_state <- pull_state_ACAG(pull_type = "Internal",
+                                     year = 2016,
+                                     level = "State",
+                                     state = c("01", "05", "04"))
 }

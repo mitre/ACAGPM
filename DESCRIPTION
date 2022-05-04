@@ -1,33 +1,40 @@
 Package: ACAGPM
-Title: Area-Weighted Mean Particulate Matter Values by Geography
-Version: 0.0.0.9000
+Title: Area-Weighted Mean Particulate Matter Values from Washington University's Atmostpheric Composition Analysis Group by Geography
+Version: 0.1.0
 Authors@R: c(
     person("Arthur", "Liberatore", email = "aliberatore@mitre.org", role = c("aut", "cre")),
-    person("Julianna", "Bernardi", "jbernardi@mitre.org", role = c("aut")))
+    person("Julianna", "Bernardi", email = "jbernardi@mitre.org", role = c("aut")),
+    person("Karen", "Jiang", email = "kjiang@mitre.org", role = c("aut")),
+    person("Hannah", "De los Santos", email = "hdelossantos@mitre.org", role = c("aut")))
 Description: This package provides the user with area-weighted mean particulate
     matter values for geographies at a given level as a CSV file. Combining 
     shapefiles from 'tigris' and raster files from Washington University's 
     Atmospheric Composition Analysis Group, functions make it possible to chose 
     among national, state, county, and city level pulls of particulate matter 
     data. Years 2014 thru 2018 of data are pre-available within the package, but
-    it is possible to pull data from as far back as ____. This package is a part
-    of MITRE's Health Equity research, an initiative to move toward's equity
-    and equality with regards to health in the United States of America.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    it is possible to pull data from as far back as 2000.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
-Imports: 
+Imports:
+    doParallel,
     dplyr,
     parallel,
+    plyr,
     raster,
+    rlang,
     sf,
     tibble,
-    tidycensus
+    tidycensus,
+    tigris,
+    methods
 Suggests: 
     rmarkdown,
     knitr,
-    testthat
+    testthat,
+    devtools,
+    ggplot2,
+    gridExtra
 Config/testthat/edition: 3
 VignetteBuilder: knitr

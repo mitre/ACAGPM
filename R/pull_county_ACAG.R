@@ -1,105 +1,50 @@
 ## INTERNAL
 
-
-#' #Come back to this one
-#' #' Function to save final processed data as CSV and Rdata files to output
-#' #' directory
-#' #'
-#' #' @param df data frame of processed data
-#' #' @param county_name vector of county names (as strings) in state
-#' #' @param state string - state abbreviation
-#' #'
-#' #' @keywords internal
-#' #' @noRd
-#' save_data <- function(df, state){
-#'
-#'   # Initialize empty list
-#'   final_df.list <- c()
-#'
-#'   for (name_index in 1:length(df)){
-#'
-#'     # Pull county name for index
-#'     county_name <- names(df)[name_index]
-#'
-#'     # Pull df with specific county
-#'     pm_data <- df[[county_name]]
-#'
-#'     # Correct format
-#'     pm_data <- as.data.frame(pm_data)
-#'
-#'     # Select desired columns
-#'     pm_data <-
-#'       if (state != "DC") {
-#'         pm_data %>%
-#'           dplyr::select(GEOID, NAMELSAD, Particulate.Matter)
-#'       } else {
-#'         pm_data %>%
-#'           dplyr::select(GEOID, NAME, Particulate.Matter)
-#'       }
-#'
-#'     # Adds column with county and state
-#'     pm_data <- pm_data %>%
-#'       add_column(county_state = rep(paste0(county_name, "_", state), nrow(pm_data)), .before = "GEOID")
-#'
-#'     # Add data as new row to list of dataframes
-#'     final_df.list <- append(final_df.list, list(pm_data))
-#'   }
-#'
-#'   # Compile into one dataframe for state
-#'   final_df <- bind_rows(final_df.list)
-#'
-#'   return(final_df)
-#' }
-
 #' Helper function to compute mean area weighted PM2.5 concentration for a given
-#' census tract
-#'
-#' @param census, dataframe of features for a given census tract
-#' @param new_dal, rasterLayer object with PM2.5 levels
+#' county
+#' @param census, dataframe of features for a given county
+#' @param new_acag, rasterLayer object with PM2.5 levels
 #'
 #' @return Modified census dataframe with mean area-weighted PM2.5 levels
 #'
 #' @keywords internal
 #' @noRd
-get_census_pm <- function(census, new_dal) {
+get_county_pm <- function(census, new_acag){
+
+  sf::sf_use_s2(use_s2 = FALSE)
 
   # Convert shapefile to spatial object
   new_geo_sp <- as(census, "Spatial")
 
-  # Crop dalhousie data to match census tract boundary
-  dalhousie_crop <-
-    crop(new_dal, new_geo_sp, snap = "out")
+  # Crops nationwide PM2.5 raster file to within county's bounds
+  acag_crop <- raster::crop(new_acag, new_geo_sp, snap = "out")
 
-  # Converts spatial object with dalhousie data to dataframe, including spatial coordinates
-  dalhousie_df <- data.frame(rasterToPoints(dalhousie_crop))
+  # Converts spatial object with PM2.5 levels to dataframe, including spatial coordinates
+  acag_df <- data.frame(raster::rasterToPoints(acag_crop))
 
-  # Convert spatial object with PM2.5 levels to SpatialPolygonsDataFrame
-  dalhousie_sp <-
-    as(dalhousie_crop, "SpatialPolygonsDataFrame")
+  # Converts spatial object with PM2.5 levels to SpatialPolygonsDataFrame
+  acag_sp <- as(acag_crop, "SpatialPolygonsDataFrame")
 
   # Convert to an sf object
-  dalhousie_sf <- st_as_sf(dalhousie_sp)
+  acag_sf <- sf::st_as_sf(acag_sp)
 
   # Pulls geometry from spatial object converted to sf
-  new_geo_sf <- st_as_sf(new_geo_sp)$geometry
+  new_geo_sf <- sf::st_as_sf(new_geo_sp)$geometry
 
   # Combines objects together to have PM2.5 levels with geometries
-  census_dalhs_int <-
-    st_intersection(dalhousie_sf, new_geo_sf)
+  census_acag_int <- sf::st_intersection(acag_sf, new_geo_sf)
 
-  # Area of each polygon
-  census_dalhs_int$grid_area <-
-    as.numeric(st_area(census_dalhs_int$geometry))
+  # Adds column corresponding to area of each polygon
+  census_acag_int$grid_area <- as.numeric(sf::st_area(census_acag_int$geometry))
 
+  ## TODO: use sp intersect function to get areas within tracts and weight by area
 
-  # Make weight = area/total census tract area -- i.e. percent coverage
-  ct_area <- as.numeric(st_area(new_geo_sf))
-  census_dalhs_int$weight <-
-    census_dalhs_int$grid_area / ct_area
+  # Make weight = area/total county area -- i.e. percent coverage
+  ct_area <- as.numeric(sf::st_area(new_geo_sf))
+  census_acag_int$weight <- census_acag_int$grid_area/ct_area
 
   # Tract value is weighted average of PM2.5 levels
-  this_ct_val <-
-    sum(census_dalhs_int$Value * census_dalhs_int$weight) / sum(census_dalhs_int$weight)
+  this_ct_val <- sum(census_acag_int$Value * census_acag_int$weight)/sum(census_acag_int$weight)
 
   census$Particulate.Matter <- this_ct_val
 
@@ -108,236 +53,198 @@ get_census_pm <- function(census, new_dal) {
   return(census)
 }
 
-#' Helper function to pull census tract shapefile for a county and initialize
-#' particulate matter column to be passed to get_census_pm
+#' Function to compute county PM2.5 levels for each state
 #'
-#' @param cty_row, dataframe of single county with geometry
-#' @param st, character string representing a state
+#' @param st, character string representing a state's GEOID
+#' @param acag, rasterLayer object containing PM2.5 levels for the USA
+#' @param county_df, dataframe containing county data
 #'
-#' @return Dataframe of tract level data for county and state with empty PM column
+#' @return Dataframe object containing GEOID, county name, and PM2.5 levels for
+#' counties in a given state
 #'
 #' @keywords internal
 #' @noRd
-get_census_geo <- function(cty_row, st) {
+get_state_geo <- function(st, acag, county_df){
 
-  # Pull county name
-  cty <- cty_row$COUNTYFP
-
-  # Get specific county shape info
-  county_geo <- tigris::tracts(state = st, county = cty) %>%
-    mutate(INTPTLAT = as.numeric(INTPTLAT),
-           INTPTLON = as.numeric(INTPTLON))
-
-  # Choose name column
-  name_col <- if (st != "DC") {
-    "NAMELSAD"
-  } else {
-    "NAME"
+  if (!is.null(county_df)){
+    county_names <- county_df %>%
+      dplyr::filter(.data$state == st) %>%
+      dplyr::pull(.data$county_state)
   }
 
-  # Initialize particulate matter column
-  new_geo <- county_geo %>%
-    mutate(Particulate.Matter = NA_real_) %>%
-    filter(AWATER / as.numeric(st_area(geometry)) < .9) # Remove tracts that are over 90
-
-  return(new_geo)
-}
-
-
-#' Function to compute census tract PM2.5 levels for each county
-#'
-#' @param st, character string representing a state
-#' @param dal, rasterLayer object containing PM2.5 levels for the USA
-#'
-#' @return Dataframe object containing GEOID, census tract, and PM2.5 levels for
-#' census tracts in a given county
-#'
-#' @keywords internal
-#' @noRd
-get_county_geo <- function(st, cty_df, dal) {
-
-  # Get Counties in state, filter to cty_df only in state
-  cty_df.st <- cty_df %>%
-    filter(state == st)
-
   # Load shapefile for counties in given state
-  print(paste0("Fetching county data for ", st, "..."))
-  geo <-
-    if (st != "DC") {
+  new_geo <-
+    if (st != "11") {
       tigris::counties(st) %>%
-        mutate(INTPTLAT = as.numeric(INTPTLAT),
-               INTPTLON = as.numeric(INTPTLON))
+        dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
+               INTPTLON = as.numeric(.data$INTPTLON))
     } else {
       tigris::counties(st, cb = T)
     }
 
-  # Selecting name column
-  name_col <- if (st != "DC") {
-    "NAMELSAD"
-  } else {
-    "NAME"
+  if (!is.null(county_df)){
+    new_geo <- new_geo %>%
+      dplyr::filter(.data$GEOID %in% county_names)
   }
 
-  # Convert to a list to be able to use with mclapply
-  cty_row.list <-
-    setNames(split(geo, seq(nrow(geo))), geo[[name_col]])
-
-  # Filter to selected counties
-  cty_row.list <-
-    cty_row.list[unlist(lapply(names(cty_row.list), function(x){
-      x %in% cty_df.st$county}))]
-
-  # Get census tract shape info
-  print("Fetching census shape data for counties...")
-  new_geo <- lapply(cty_row.list, get_census_geo, st = st)
-
   # CRS needs to line up
-  new_dal <- projectRaster(dal, crs = crs(new_geo[[1]]))
-  new_dal@data@names <- "Value"
+  new_acag <- raster::projectRaster(acag, crs = raster::crs(new_geo))
+  new_acag@data@names <- "Value"
 
-  # Assign rownames
-  new_geo.list <- lapply(new_geo, function(df){
-    setNames(split(df, seq(nrow(df))), df$GEOID)
-  })
+  # Convert df to a list to be able to parallelize in mclapply
+  new_geo.list <-
+    setNames(split(new_geo, seq(nrow(new_geo))), rownames(new_geo))
 
-  # Compute mean area concentration for CTs
-  print("Computing mean area weighted PM2.5...")
-  final_geo <- lapply(new_geo.list, function(df){
-    lapply(df, get_census_pm, new_dal)
-  })
+  # Perform parallel computation, which pulls PM2.5 levels for each county in the state
+  nodes <- parallel::detectCores()
+  cl <- parallel::makeCluster(nodes)
+  doParallel::registerDoParallel(cl)
 
-  # Combine into single df
-  final_geo.df <- lapply(final_geo, bind_rows)
+  new_geo.list_PM <- plyr::llply(new_geo.list, get_county_pm, new_acag = new_acag, .parallel = TRUE, .paropts = list(.packages = c("raster", "sf")))
+  pm_data <- do.call("rbind", new_geo.list_PM) # Back to df
 
-  # Save
-  paste0(paste0("Saving ", st, "..."))
-  return(save_data(df = final_geo.df, state = st))
+  # Pull desired columns
+  pm_data <- as.data.frame(pm_data)
+  pm_data <-
+    if (st != "11") {
+      pm_data %>%
+        dplyr::select(.data$STATEFP, .data$GEOID, .data$NAMELSAD, .data$Particulate.Matter)
+    } else {
+      pm_data %>%
+        dplyr::select(.data$STATEFP, .data$GEOID, .data$NAME, .data$Particulate.Matter)
+    }
+
+  return(pm_data)
 }
 
 ## EXTERNAL
 
 #' County level particulate matter data
 #'
-#' Pulls PM2.5 data at a county level, either internally or externally. Years
-#' 2015 through 2018 are pre-available within the package, but year ____ through
-#' 2014 are available as an external pull.
+#' Pulls PM2.5 data at a county granularity with level selections, either
+#' internally or as a new pull. Years 2015 through 2018 are pre-available within
+#' the package, but years 2014 and earlier are available as a pull combining
+#' PM2.5 raster files and tigris shape files. More information on external pulls
+#' contained in the vignette.
 #'
-#' @param year, numeric object representing a selected year
-#' @param county_state, character vector of selected counties
+#' @param pull_type, character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"
+#' @param year, numeric object representing a selected year. Used if pull_type is "Internal"
+#' @param level, character string representing desired level of pull. "National", "State", or "County"
+#' @param state, character vector of selected states via GEOID. Used if level is "State"
+#' @param county_state, character vector of selected counties via GEOID. Used if level "County"
+#' @param acag, particulate matter raster object. Used if pull_type is "External"
 #'
-#' @return Dataframe object broken down by census tracts in each county with
-#' mean area-weighted PM2.5 values. If the county_state field is empty, PM2.5
-#' data for census tracts in all counties is returned. If input year is
-#' unavailable, returns an error.
+#' @return Dataframe object broken down by counties with mean
+#' area-weighted PM2.5 values.
 #'
 #' @examples
-#' pull_county_ACAG(year = 2016, state = c("Abbeville County_SC", "Acadia Parish_LA", "Accomack County_VA"))
-#' pull_county_ACAG(year = 2016)
+#' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+#'                                        year = 2016,
+#'                                        level = "National")
+#' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+#'                                        year = 2016,
+#'                                        level = "State",
+#'                                        state = c("01", "05", "04"))
+#' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
+#'                                        year = 2016,
+#'                                        level = "County",
+#'                                        county_state = c("45001", "22001", "51001"))
 #' @export
-pull_county_ACAG <- function(year, county_state = c()){
+pull_county_ACAG <- function(pull_type, year = NULL, level, state = c(), county_state = c(), acag = NULL){
 
   # Pre-available years of data
   available_years <- c(2015, 2016, 2017, 2018)
 
-  # Dataframe of info related to US cities
-  us_cities <- read.csv(file.path("..", "data", "input", "US_cities.csv"))
+  county_lookup <- NULL
+  load(system.file(file.path("extdata", "input", "county_lookup.RData"), package = "ACAGPM"))
 
-  # Does not include Alaska or Hawaii
-  states <- c(setdiff(state.abb, c("AK", "HI")), "DC")
+  county_df = NULL
 
-  # Dataframe of all available counties a user can choose; total count 3108
-  every_county <- read.csv(file.path("..", "data", "input", "all_counties.csv"), encoding = "UTF-8") %>%
-    dplyr::mutate(county_state = paste0(county, "_", state))
+  if (level == "National"){
+    st <- unique(county_lookup$STATEFP)
+    st.STUSPS <- unique(county_lookup %>% dplyr::filter(.data$STATEFP %in% st) %>% dplyr::pull(.data$STUSPS))
+  } else if (level == "State"){
+    if (class(state) != "character"){
+      stop("Improper input, must be character")
+    }
+    if (all(state %in% unique(county_lookup$STATEFP))){
+      st <- state
+      st.STUSPS <- unique(county_lookup %>% dplyr::filter(.data$STATEFP %in% st) %>% dplyr::pull(.data$STUSPS))
+    } else{
+      stop("Improper input, unrecognized state")
+    }
+  } else if (level == "County"){
+    if (class(county_state) != "character"){
+      stop("Improper input, must be character")
+    }
+    if (all(county_state %in% county_lookup$GEOID.COUNTY)){
 
-  # If no counties are entered, pull PM2.5 for al states
-  if (length(county_state) == 0){
-    county_state <- every_county$county_state
+      # Creates vector containing states chosen
+      county_df <- county_lookup %>%
+        dplyr::filter(.data$GEOID.COUNTY %in% county_state) %>%
+        dplyr::select(.data$GEOID.COUNTY, .data$GEOID.STATE) %>%
+        dplyr::rename(county_state = .data$GEOID.COUNTY, state = .data$GEOID.STATE)
+
+      st <- unique(county_df$state)
+      st.STUSPS <- unique(county_lookup %>% dplyr::filter(.data$GEOID.STATE %in% st) %>% dplyr::pull(.data$STUSPS))
+
+    } else{
+      stop("Improper input, unrecognized county")
+    }
+  } else{
+    stop("Improper input, unrecognized level")
   }
 
-  # Creates vector containing states chosen
-  state <- sapply(county_state, function(x){
-    unlist(strsplit(x, split = "_"))[2]
-  })
+  # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
+  # Else, returns an object pulled from selected year of data as a dataframe.
+  # Returns an error if unrecognized state is selected as input.
+  if (pull_type == "Internal"){
 
-  # Creates vector containing counties chosen
-  county <- sapply(county_state, function(x){
-    unlist(strsplit(x, split = "_"))[1]
-  })
-
-  # Dataframe of user input and additional information
-  county_df <- cbind.data.frame(county, state, county_state)
-
-  # Initialized dataframe; do we need this?
-  ACAG_pm_dat_County <- data.frame(county_state = character(),
-                                  GEOID = numeric(),
-                                  NAME = character(),
-                                  Particulate.Matter = numeric())
-
-  # Returns csv corresponding to the available year as a dataframe
-  if (year %in% available_years){
-    # Returns csvs correspondiing to given year in selected counties as a combined dataframe object
-    if (all(county_state %in% every_county$county_state)){
-
+    if (year %in% available_years){
+    } else{
+      stop("Improper input, invalid year")
+    }
       # Pulls selected data as list of dataframes
-      dflist <- lapply(county_state, function(x){
-        # Pull csv for county
-        tempdf <- read.csv(file.path("..", "data", "output", year, "County", paste0("Dalhousie_pm_dat_", x, ".csv")))
+      dflist <- lapply(st.STUSPS, function(x){
+        pm_data <- NULL
+        load(system.file(file.path("extdata", "output", year, "county", paste0("acag_pm_dat_", x, ".RData")), package = "ACAGPM"))
+        tempdf <- pm_data
 
-        # Add column with name of county and state
+        if (level == "County"){
+          tempdf <- tempdf %>%
+            dplyr::filter(.data$GEOID %in% county_state)
+        }
+
+        # Add column with name of state
         tempdf <- tempdf %>%
-          tibble::add_column(county_state = rep(x, nrow(tempdf)), .before = "GEOID")
+          tibble::add_column(state = rep(x, nrow(tempdf)), .before = "GEOID")
 
         return(tempdf)
       })
 
       # Convert list of dataframes to dataframe
-      ACAG_pm_dat_County <- dplyr::bind_rows(dflist)
+      ACAG_pm_dat_State <- dplyr::bind_rows(dflist)
 
-      return(ACAG_pm_dat_County)
-    }
-    # If an unrecognized county is entered, throw error
-    else{
-      stop("Improper input, unrecognized county")
-    }
-  }
+      return(ACAG_pm_dat_State)
 
-  # Returns an object pulled from selected year of data as a dataframe
-  else{
-    # Pull PM2.5 data for the given year in selected counties
-    if (all(county_state %in% every_county$county_state)){
+  } else if (pull_type == "External"){
+
       # Pull PM2.5 for the given year
-      dalhousie <- raster(
-        file.path(
-          "data",
-          "input",
-          "acag_raw_data_files",
-          paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
-        ))
-      dalhousie@data@names <- "Value"
+      acag <- acag
+      if (class(acag) != "RasterLayer"){
+        stop("Improper input, acag must be RasterLayer object")
+      }
+      acag@data@names <- "Value"
 
-      ## Keeping these in case we want to define new_dalhousie once
-      # crs_args <- "+proj=longlat +datum=NAD83 +no_defs"
-      # new_dalhousie <- raster(
-      #   file.path(
-      #     "data",
-      #     "input",
-      #     "acag_raw_data_files",
-      #     paste0("V4NA03_PM25_NA_", year, "01_", year, "12-RH35-NoNegs.asc")
-      #   ),
-      #   crs = crs_args)
-      # new_dalhousie@data@names <- "Value"
-
-      #Perform a pull state by state
-      dflist <- lapply(unique(state), get_county_geo, county_df, dalhousie)
+      # Perform a pull state by state
+      dflist <- lapply(st, get_state_geo, acag, county_df)
 
       # Convert list of dataframes to dataframe
-      ACAG_pm_dat_County <- bind_rows(dflist)
+      ACAG_pm_dat_State <- dplyr::bind_rows(dflist)
 
-      return(ACAG_pm_dat_County)
-    }
-    # If an unrecognized county is entered, throw error
-    else{
-      stop("Improper input, unrecognized county")
-    }
+      return(ACAG_pm_dat_State)
+
+  } else{
+    stop("Improper input, pull_type must be Internal or External")
   }
 }

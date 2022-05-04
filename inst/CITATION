@@ -1,0 +1,14 @@
+citHeader("To cite ACAGPM in publications use:")
+
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s", meta$Version)
+
+bibentry(bibtype = "Manual",
+         title = "{ACAGPM}: Area-Weighted Mean Particulate Matter Values from Washington University's Atmostpheric Composition Analysis Group by Geography",
+         author = c(person("Arthur", "Liberatore"),
+                    person("Julianna", "Bernardi"),
+                    person("Hannah", "De los Santos"),
+                    person("Karen", "Jiang")),
+         year = year,
+         note = note,
+         url = "gitlab.mitre.org")
