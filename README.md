@@ -2,29 +2,58 @@
 
 Particulate Matter (PM2.5) is a term referring to microscopic particles, not greater than 2.5 micro-meters in diameter, suspended in air. These particles have a variety of adverse health effects on humans, given their ability to quickly enter the bloodstream via inhalation.
 
-Research initiatives, especially those relating to climate and human health, can greatly benefit from access to PM2.5 data; this package aims to provide users with easy access to that data.
+Research initiatives, especially those relating to climate and human health, can greatly benefit from access to PM2.5 data; this package aims to provide users with easy access to that data by alligning it with 2010 state, county, and census tract shape files.
 
-### Installing and Running
+### Dependencies
 
-Installing entails the following process:
+This package requires installation of the following packages.
 
-1. Download this repository to a directory of your choosing.
+#### Imports
 
-2. Set working directory to the directory containing this repository.
+- doParallel
 
-3. Install dependencies.
+- dplyr
 
-#### General users
+- methods
 
-4. Use the function **devtools::build()**. This will build the package in a structure which R can read as it does other packages.
+- parallel
 
-5. Take note of the file path which was returned from **devtools::build()**. Set a variable **file_path** to that file path. Use the following command: **install.packages(file_path, repos = NULL, type = "source")**
+- plyr
 
-6. Use the command **library(ACAGPM)**. The package will now be accessible for use.
+- raster
 
-#### Developers
+- rlang
 
-4. Use the function **devtools::load_all()**. This will load the functions for use as if the package were built and loaded.
+- sf
+
+- tibble
+
+- tidycensus
+
+- tigris
+
+#### Suggests
+
+- devtools
+
+- ggplot2
+
+- gridExtra
+
+- knitr
+
+- rmarkdown
+
+- testthat
+
+### Installation
+
+Executing the following code will install the package, using the **devtools** package:
+
+```
+install.packages("devtools")
+devtools::install_git("https://gitlab.mitre.org/health-equity-mip/acagpm.git", ref = "main")
+```
 
 ### Usage and structure
 
@@ -56,11 +85,11 @@ Data for years 2000-2014 can be pulled externally with the functions **pull_stat
 
 1. Retrieve Raster files
 
-    - Go to the [Surface PM2.5 Data Folder](https://wustl.app.box.com/v/ACAG-V4NA03-PM25/folder/136303334735) owned by Washington University in St. Louis' Atmospheric Composition and Analysis Group. Files will be in the format *V4NA03_PM25_NA_**YEAR**01_**YEAR**12-RH35-NoNegs.asc.zip* where **YEAR** is the desired year of data. Save the file to a directory of your choosing. Then, use your favorite file compression tool to unzip the file. There will be 2 files: *V4NA03_PM25_NA_**YEAR**01_**YEAR**12-RH35-NoNegs.asc* and *V4NA03_PM25_NA_**YEAR**01_**YEAR**12-RH35-NoNegs.prj*. The *.asc* file will be of use to us in this case.
+    - Go to the [Surface PM2.5 Data Folder](https://wustl.app.box.com/v/ACAG-V4NA03-PM25/folder/136303334735) owned by [Washington University in St. Louis' Atmospheric Composition and Analysis Group](https://sites.wustl.edu/acag/). Files will be in the format *V4NA03_PM25_NA_**YEAR**01_**YEAR**12-RH35-NoNegs.asc.zip* where **YEAR** is the desired year of data. Save the file to a directory of your choosing. Then, use your favorite file compression tool to unzip the file. There will be 2 files: *V4NA03_PM25_NA_**YEAR**01_**YEAR**12-RH35-NoNegs.asc* and *V4NA03_PM25_NA_**YEAR**01_**YEAR**12-RH35-NoNegs.prj*. The *.asc* file will be of use to us in this case.
 
 2. Load Raster Object in R
 
-    - Exectute the following code in R. This will load the raster file into R as a RasterLauer object. Make sure that file_dir is the directory which contains the PM2.5 file, and year matches the **YEAE** value in the filename.
+    - Exectute the following code in R. This will load the raster file into R as a RasterLayer object. Make sure that file_dir is the directory which contains the PM2.5 file, and year matches the **YEAR** value in the filename.
 
 ```
 library(raster)
@@ -107,8 +136,6 @@ This function allows the user to look up the GEOID of a state, county, or tract.
 
 ### Contact
 
-For more information about the Asthma Equity Explorer Dashboard, please contact:
+For more information about ACAGPM, please contact:
 
-Hannah De los Santos, PhD, Co-Principal Investigator at [hdelossantos\@mitre.org](hdelossantos@mitre.org)
-
-Cassandra Okechukwu, PhD, Co-Principal Investigator at [cokechukwu\@mitre.org](cokechukwu@mitre.org)
+Hannah De los Santos, PhD, Principal Investigator at [hdelossantos\@mitre.org](hdelossantos@mitre.org)
