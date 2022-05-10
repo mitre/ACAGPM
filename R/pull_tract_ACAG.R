@@ -8,7 +8,7 @@
 #'
 #' @keywords internal
 #' @noRd
-save_data <- function(df, state){
+format_data <- function(df, state){
 
   # Initialize empty list
   final_df.list <- c()
@@ -117,7 +117,7 @@ get_census_geo <- function(cty_row, st, level, tract_df.st) {
   cty <- cty_row$COUNTYFP
 
   # Get specific county shape info
-  county_geo <- tigris::tracts(state = st, county = cty) %>%
+  county_geo <- tigris::tracts(state = st, county = cty, year = 2020) %>%
     dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
            INTPTLON = as.numeric(.data$INTPTLON))
 
@@ -157,11 +157,11 @@ get_county_geo <- function(st, tract_df, level, acag) {
 
   geo <-
     if (st != "11") {
-      tigris::counties(st) %>%
+      tigris::counties(st, year = 2020) %>%
         dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
                 INTPTLON = as.numeric(.data$INTPTLON))
     } else {
-      tigris::counties(st, cb = T)
+      tigris::counties(st, cb = T, year = 2020)
     }
 
 
@@ -205,7 +205,7 @@ get_county_geo <- function(st, tract_df, level, acag) {
     dplyr::pull(.data$STUSPS)
 
   # Save
-  return(save_data(df = final_geo.df, state = state.name))
+  return(format_data(df = final_geo.df, state = state.name))
 }
 
 ## EXTERNAL
@@ -216,7 +216,7 @@ get_county_geo <- function(st, tract_df, level, acag) {
 #' internally or as a new pull. Years 2015 through 2018 are pre-available within
 #' the package, but years 2014 and earlier are available as a pull combining
 #' PM2.5 raster files and tigris shape files. More information on external pulls
-#' contained in the vignette.
+#' contained in the vignette. Data for Alaska and Hawaii is not available.
 #'
 #' @param pull_type, character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"
 #' @param year, numeric object representing a selected year. Used if pull_type is "Internal"
@@ -227,7 +227,7 @@ get_county_geo <- function(st, tract_df, level, acag) {
 #' @param acag, particulate matter raster object. Used if pull_type is "External"
 #'
 #' @return Dataframe object broken down by census tracts with
-#' mean area-weighted PM2.5 values.
+#' mean area-weighted PM2.5 values in micro-grams per cubic meter.
 #'
 #' @examples
 #' acag_pm_dat_tract <- pull_tract_ACAG(pull_type = "Internal",
@@ -249,7 +249,9 @@ get_county_geo <- function(st, tract_df, level, acag) {
 pull_tract_ACAG <- function(pull_type, year = NULL, level, state = c(), county_state = c(), tract_county_state = c(), acag = NULL){
 
   # Pre-available years of data
-  available_years <- c(2015, 2016, 2017, 2018)
+  available_years <- as.numeric(list.dirs(path = system.file(file.path("extdata", "output"), package = "ACAGPM"),
+                                          full.names = FALSE,
+                                          recursive = FALSE))
 
   tract_lookup <- NULL
   load(system.file(file.path("extdata", "input", "tract_lookup.RData"), package = "ACAGPM"))
@@ -323,7 +325,7 @@ pull_tract_ACAG <- function(pull_type, year = NULL, level, state = c(), county_s
     stop("Improper input, unrecognized level")
   }
 
-  # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
+  # If available year selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   # Returns an error if unrecognized state is selected as input.
   if (pull_type == "Internal"){

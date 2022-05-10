@@ -18,11 +18,11 @@ library(ACAGPM)
 
 ## Introduction
 
-Particulate Matter (PM2.5) is a term referring to microscopic particles, not greater than 2.5 micro-meters in diameter, suspended in air. These particles have a variety of adverse health effects on humans, given their ability to quickly enter the bloodstream via inhalation. Research initiatives, specifically with regards to climate and human health, can greatly benefit from access to PM2.5 data; this package provides users with easy access to said data.
+Particulate Matter 2.5 (PM2.5) is a term referring to microscopic particles, not greater than 2.5 micro-meters in diameter, suspended in air. These particles have a variety of adverse health effects on humans, given their ability to quickly enter the bloodstream via inhalation. Research initiatives, specifically with regards to climate and human health, can greatly benefit from access to PM2.5 data; this package provides users with easy access to said data.
 
 ## Available Data
 
-This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with *tigris* shape file data at 3 different granularities for a variety of years. Those three granularities are as follows:
+This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with 2020 *tigris* shape file data at 3 different granularities for a variety of years. Those three granularities are as follows:
 
 1. State
 1. County
@@ -53,6 +53,7 @@ The particulate matter value assigned to a particular geography is calculated vi
 * PM Concentrations are the PM values found in a grid block
 * Weight is the area of a grid block contained in the geography, divided by the total area of the geography
 * Exact value is found by summing the PM Concentrations multiplied by the corresponding weights, then dividing that sum by the sum of all weights.
+* Units are micro-grams per cubic meter.
 
 An example of a calculation for Census Tract 123 of Providence County, Rhode Island is shown below.
 

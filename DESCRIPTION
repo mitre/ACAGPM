@@ -7,12 +7,13 @@ Authors@R: c(
     person("Karen", "Jiang", email = "kjiang@mitre.org", role = c("aut")),
     person("Hannah", "De los Santos", email = "hdelossantos@mitre.org", role = c("aut")))
 Description: This package provides the user with area-weighted mean particulate
-    matter values for geographies at a given level as a CSV file. Combining 
-    shapefiles from 'tigris' and raster files from Washington University's 
-    Atmospheric Composition Analysis Group, functions make it possible to chose 
-    among national, state, county, and city level pulls of particulate matter 
-    data. Years 2014 thru 2018 of data are pre-available within the package, but
-    it is possible to pull data from as far back as 2000.
+    matter values in micro-grams per cubic meter for geographies at a given 
+    level as a CSV file. Combining shapefiles from 'tigris' and raster files 
+    from Washington University's Atmospheric Composition Analysis Group, 
+    functions make it possible to chose among national, state, county, and city
+    level pulls of particulate matter data. Years 2014 thru 2018 of data are 
+    pre-available within the package, but it is possible to pull data from as 
+    far back as 2000.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

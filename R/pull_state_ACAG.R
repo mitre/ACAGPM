@@ -1,7 +1,7 @@
 ## INTERNAL
 
-#' Function to perform mean area weighting within state to summarise PM2.5
-#' concentrations from gridded data
+#' Helper function to compute mean area weighted PM2.5 concentration for a given
+#' state
 #'
 #' @param state, dataframe of features for a given state
 #' @param new_acag, rasterLayer object with PM2.5 levels
@@ -65,7 +65,7 @@ get_pm_data <- function(state, new_acag){
 get_national_geo <- function(st, acag){
 
   # Load shapefile for given state
-  geo <- tigris::states(cb = T) %>%
+  geo <- tigris::states(cb = T, year = 2020) %>%
     dplyr::filter(.data$GEOID %in% st)
 
   # CRS needs to line up
@@ -104,7 +104,7 @@ get_national_geo <- function(st, acag){
 #' internally or as a new pull. Years 2015 through 2018 are pre-available within
 #' the package, but years 2014 and earlier are available as a pull combining
 #' PM2.5 raster files and tigris shape files. More information on external pulls
-#' contained in the vignette.
+#' contained in the vignette. Data for Alaska and Hawaii is not available.
 #'
 #' @param pull_type, character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"
 #' @param year, numeric object representing a selected year. Used if pull_type is "Internal"
@@ -113,7 +113,7 @@ get_national_geo <- function(st, acag){
 #' @param acag, particulate matter raster object. Used if pull_type is "External"
 #'
 #' @return Dataframe object broken down by state with mean area-weighted PM2.5
-#' values.
+#' values in micro-grams per cubic meter.
 #'
 #' @examples
 #' acag_pm_dat_state <- pull_state_ACAG(pull_type = "Internal",
@@ -133,18 +133,18 @@ get_national_geo <- function(st, acag){
 pull_state_ACAG <- function(pull_type, year = NULL, level, state = c(), acag = NULL){
 
   # Pre-available years
-  available_years <- c(2015, 2016, 2017, 2018)
+  available_years <- as.numeric(list.dirs(path = system.file(file.path("extdata", "output"), package = "ACAGPM"),
+                                          full.names = FALSE,
+                                          recursive = FALSE))
 
   # Does not include Alaska or Hawaii!
   state_lookup <- NULL
   load(system.file(file.path("extdata", "input", "state_lookup.RData"), package = "ACAGPM"))
 
-  # file_path <- system.file(file.path("extdata", "output", year, "state", "acag_pm_dat_US.csv"),
-  #                          package = "ACAGPM")
   file_path <- system.file(file.path("extdata", "output", year, "state", "acag_pm_dat_US.RData"),
                            package = "ACAGPM")
 
-  # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
+  # If available year selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   if (pull_type == "Internal"){
     if (year %in% available_years){
