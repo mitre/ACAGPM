@@ -117,7 +117,7 @@ get_census_geo <- function(cty_row, st, level, tract_df.st) {
   cty <- cty_row$COUNTYFP
 
   # Get specific county shape info
-  county_geo <- tigris::tracts(state = st, county = cty, year = 2020) %>%
+  county_geo <- tigris::tracts(state = st, county = cty, year = 2019) %>%
     dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
            INTPTLON = as.numeric(.data$INTPTLON))
 
@@ -157,11 +157,11 @@ get_county_geo <- function(st, tract_df, level, acag) {
 
   geo <-
     if (st != "11") {
-      tigris::counties(st, year = 2020) %>%
+      tigris::counties(st, year = 2019) %>%
         dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
                 INTPTLON = as.numeric(.data$INTPTLON))
     } else {
-      tigris::counties(st, cb = T, year = 2020)
+      tigris::counties(st, cb = T, year = 2019)
     }
 
 

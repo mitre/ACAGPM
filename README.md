@@ -2,7 +2,7 @@
 
 Particulate Matter (PM2.5) is a term referring to microscopic particles, not greater than 2.5 micro-meters in diameter, suspended in air. These particles have a variety of adverse health effects on humans, given their ability to quickly enter the bloodstream via inhalation.
 
-Research initiatives, especially those relating to climate and human health, can greatly benefit from access to PM2.5 data; this package aims to provide users with easy access to that data by aligning [WUSTL's Atmospheric Composition Analysis Group](https://sites.wustl.edu/acag/) Particulate Matter 2.5 raster files with 2020 state, county, and census tract shape files.
+Research initiatives, especially those relating to climate and human health, can greatly benefit from access to PM2.5 data; this package aims to provide users with easy access to that data by aligning [WUSTL's Atmospheric Composition Analysis Group](https://sites.wustl.edu/acag/) Particulate Matter 2.5 raster files with 2019 state, county, and census tract shape files.
 
 ### Dependencies
 

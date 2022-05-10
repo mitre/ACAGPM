@@ -22,7 +22,7 @@ Particulate Matter 2.5 (PM2.5) is a term referring to microscopic particles, not
 
 ## Available Data
 
-This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with 2020 *tigris* shape file data at 3 different granularities for a variety of years. Those three granularities are as follows:
+This package combines *WUSTL's Atmospheric Composition Analysis Group* raster files with 2019 *tigris* shape file data at 3 different granularities for a variety of years. Those three granularities are as follows:
 
 1. State
 1. County

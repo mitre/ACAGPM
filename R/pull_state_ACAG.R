@@ -65,7 +65,7 @@ get_pm_data <- function(state, new_acag){
 get_national_geo <- function(st, acag){
 
   # Load shapefile for given state
-  geo <- tigris::states(cb = T, year = 2020) %>%
+  geo <- tigris::states(cb = T, year = 2019) %>%
     dplyr::filter(.data$GEOID %in% st)
 
   # CRS needs to line up

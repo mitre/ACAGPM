@@ -74,11 +74,11 @@ get_state_geo <- function(st, acag, county_df){
   # Load shapefile for counties in given state
   new_geo <-
     if (st != "11") {
-      tigris::counties(st, year = 2020) %>%
+      tigris::counties(st, year = 2019) %>%
         dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
                INTPTLON = as.numeric(.data$INTPTLON))
     } else {
-      tigris::counties(st, cb = T, year = 2020)
+      tigris::counties(st, cb = T, year = 2019)
     }
 
   if (!is.null(county_df)){
