@@ -2,13 +2,15 @@
 
 Particulate Matter (PM2.5) is a term referring to microscopic particles, not greater than 2.5 micro-meters in diameter, suspended in air. These particles have a variety of adverse health effects on humans, given their ability to quickly enter the bloodstream via inhalation.
 
-Research initiatives, especially those relating to climate and human health, can greatly benefit from access to PM2.5 data; this package aims to provide users with easy access to that data by alligning it with 2010 state, county, and census tract shape files.
+Research initiatives, especially those relating to climate and human health, can greatly benefit from access to PM2.5 data; this package aims to provide users with easy access to that data by aligning [WUSTL's Atmospheric Composition Analysis Group](https://sites.wustl.edu/acag/) Particulate Matter 2.5 raster files with 2019 state, county, and census tract shape files.
 
 ### Dependencies
 
 This package requires installation of the following packages.
 
 #### Imports
+
+- devtools
 
 - doParallel
 
@@ -34,8 +36,6 @@ This package requires installation of the following packages.
 
 #### Suggests
 
-- devtools
-
 - ggplot2
 
 - gridExtra
@@ -57,7 +57,7 @@ devtools::install_git("https://gitlab.mitre.org/health-equity-mip/acagpm.git", r
 
 ### Usage and structure
 
-The package has 2 basic functionalities, and an additional functionality, gone into detail in their own sections. Further detail on each function and their uses is provided in the vignette.
+The package has 2 basic functionalities, pulling PM2.5 data internally and pulling PM2.5 data externally (pull_state_ACAG, pull_county_ACAG, pull_tract_ACAG). An additional functionality allowing users to look up the GEOID of a geography is also included (lookup_GEOID). Further detail on each function and their uses is provided in the vignette.
 
 Particulate Matter values for a geography are found using area-weighted mean calculations. Some things to note:
 
@@ -67,11 +67,13 @@ Particulate Matter values for a geography are found using area-weighted mean cal
 
 - Exact value is found by summing the PM concentrations multiplied by the corresponding weights, then dividing that sum by the sum of all weights.
 
+- Units are micro-grams per cubic meter
+
 Output of the basic functionalities are formed around their potential for use with census data via the GEOID field. Users will be able to take other data available through packages such as *tidycensus* and join with this data, creating practical analyses with ease.
 
 #### Basic: Internal Data Pulls
 
-Data can be pulled from within the package with the functions **pull_state_ACAG**, **pull_county_ACAG**, and **pull_tract_ACAG**. Years 2015-2018 are currently available for internal pulls. Each function has a similar structure:
+Data can be pulled from within the package with the functions **pull_state_ACAG**, **pull_county_ACAG**, and **pull_tract_ACAG**. Years 2015-2018 are currently available for internal pulls.  Data for Alaska and Hawaii is not available. Each function has a similar structure:
 
 - Process user input and make sure it is acceptable using the lookup tables from the */ACAGPM/inst/extdata/input* subdirectory.
 
@@ -124,7 +126,7 @@ With those 2 steps complete, a function of your choosing may be called. Each fun
 
 - Combine list into dataframe and pull GEOID, NAME, and Particulate.Matter fields.
 
-- Return output to the user.
+- Return dataframe to the user.
 
 #### Additional: lookup_GEOID
 
@@ -132,7 +134,7 @@ This function allows the user to look up the GEOID of a state, county, or tract.
 
 - Uses dataframes saved as .RDS files in the */ACAGPM/inst/extdata/input* subdirectory.
 
-- Relatively straightforward in build. Input is split, used as a filter for the dataframe, output is pulled, and returned to the user.
+- Relatively straightforward in build. Input is split, used as a filter for the dataframe, output is pulled, and returned to the user as character string.
 
 ### Contact
 

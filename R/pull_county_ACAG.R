@@ -2,6 +2,7 @@
 
 #' Helper function to compute mean area weighted PM2.5 concentration for a given
 #' county
+#'
 #' @param census, dataframe of features for a given county
 #' @param new_acag, rasterLayer object with PM2.5 levels
 #'
@@ -36,8 +37,6 @@ get_county_pm <- function(census, new_acag){
 
   # Adds column corresponding to area of each polygon
   census_acag_int$grid_area <- as.numeric(sf::st_area(census_acag_int$geometry))
-
-  ## TODO: use sp intersect function to get areas within tracts and weight by area
 
   # Make weight = area/total county area -- i.e. percent coverage
   ct_area <- as.numeric(sf::st_area(new_geo_sf))
@@ -75,11 +74,11 @@ get_state_geo <- function(st, acag, county_df){
   # Load shapefile for counties in given state
   new_geo <-
     if (st != "11") {
-      tigris::counties(st) %>%
+      tigris::counties(st, year = 2019) %>%
         dplyr::mutate(INTPTLAT = as.numeric(.data$INTPTLAT),
                INTPTLON = as.numeric(.data$INTPTLON))
     } else {
-      tigris::counties(st, cb = T)
+      tigris::counties(st, cb = T, year = 2019)
     }
 
   if (!is.null(county_df)){
@@ -125,7 +124,7 @@ get_state_geo <- function(st, acag, county_df){
 #' internally or as a new pull. Years 2015 through 2018 are pre-available within
 #' the package, but years 2014 and earlier are available as a pull combining
 #' PM2.5 raster files and tigris shape files. More information on external pulls
-#' contained in the vignette.
+#' contained in the vignette. Data for Alaska and Hawaii is not available.
 #'
 #' @param pull_type, character string representing whether internal data is pulled or new processing is performed. "Internal" or "External"
 #' @param year, numeric object representing a selected year. Used if pull_type is "Internal"
@@ -135,7 +134,7 @@ get_state_geo <- function(st, acag, county_df){
 #' @param acag, particulate matter raster object. Used if pull_type is "External"
 #'
 #' @return Dataframe object broken down by counties with mean
-#' area-weighted PM2.5 values.
+#' area-weighted PM2.5 values in micro-grams per cubic meter.
 #'
 #' @examples
 #' acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
@@ -153,7 +152,9 @@ get_state_geo <- function(st, acag, county_df){
 pull_county_ACAG <- function(pull_type, year = NULL, level, state = c(), county_state = c(), acag = NULL){
 
   # Pre-available years of data
-  available_years <- c(2015, 2016, 2017, 2018)
+  available_years <- as.numeric(list.dirs(path = system.file(file.path("extdata", "output"), package = "ACAGPM"),
+                               full.names = FALSE,
+                               recursive = FALSE))
 
   county_lookup <- NULL
   load(system.file(file.path("extdata", "input", "county_lookup.RData"), package = "ACAGPM"))
@@ -195,7 +196,7 @@ pull_county_ACAG <- function(pull_type, year = NULL, level, state = c(), county_
     stop("Improper input, unrecognized level")
   }
 
-  # If year 2015-2018 selected, returns csv corresponding to year as a dataframe.
+  # If available year selected, returns csv corresponding to year as a dataframe.
   # Else, returns an object pulled from selected year of data as a dataframe.
   # Returns an error if unrecognized state is selected as input.
   if (pull_type == "Internal"){

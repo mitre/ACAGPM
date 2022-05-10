@@ -28,14 +28,14 @@ pull_county_ACAG(
 }
 \value{
 Dataframe object broken down by counties with mean
-area-weighted PM2.5 values.
+area-weighted PM2.5 values in micro-grams per cubic meter.
 }
 \description{
 Pulls PM2.5 data at a county granularity with level selections, either
 internally or as a new pull. Years 2015 through 2018 are pre-available within
 the package, but years 2014 and earlier are available as a pull combining
 PM2.5 raster files and tigris shape files. More information on external pulls
-contained in the vignette.
+contained in the vignette. Data for Alaska and Hawaii is not available.
 }
 \examples{
 acag_pm_dat_county <- pull_county_ACAG(pull_type = "Internal",
