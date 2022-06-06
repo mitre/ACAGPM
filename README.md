@@ -141,3 +141,6 @@ This function allows the user to look up the GEOID of a state, county, or tract.
 For more information about ACAGPM, please contact:
 
 Hannah De los Santos, PhD, Principal Investigator at [hdelossantos\@mitre.org](hdelossantos@mitre.org)
+
+
+Approved for Public Release; Distribution Unlimited. Public Release Case Number 22-1546. ©2021 The MITRE Corporation. ALL RIGHTS RESERVED.
