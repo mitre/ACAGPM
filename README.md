@@ -52,7 +52,7 @@ Executing the following code will install the package, using the **devtools** pa
 
 ```
 install.packages("devtools")
-devtools::install_git("https://gitlab.mitre.org/health-equity-mip/acagpm.git", ref = "main")
+devtools::install_github("mitre/ACAGPM", ref = "main")
 ```
 
 ### Usage and structure
@@ -135,6 +135,14 @@ This function allows the user to look up the GEOID of a state, county, or tract.
 - Uses dataframes saved as .RDS files in the */ACAGPM/inst/extdata/input* subdirectory.
 
 - Relatively straightforward in build. Input is split, used as a filter for the dataframe, output is pulled, and returned to the user as character string.
+
+### References
+
+<a id="1">[1]</a>
+Hammer, M. S.; van Donkelaar, A.; Li, C.; Lyapustin, A.; Sayer, A. M.; Hsu, N. C.; Levy, R. C.; Garay, M. J.; Kalashnikova, O. V.; Kahn, R. A.; Brauer, M.; Apte, J. S.; Henze, D. K.; Zhang, L.; Zhang, Q.; Ford, B.; Pierce, J. R.; and Martin, R. V., Global Estimates and Long-Term Trends of Fine Particulate Matter Concentrations (1998-2018)., Environ. Sci. Technol, doi: 10.1021/acs.est.0c01764, 2020. [Link](https://pubs.acs.org/doi/full/10.1021/acs.est.0c01764)
+
+<a id="2">[2]</a>
+van Donkelaar, A., R. V. Martin, et al. (2019). Regional Estimates of Chemical Composition of Fine Particulate Matter using a Combined Geoscience-Statistical Method with Information from Satellites, Models, and Monitors. Environmental Science & Technology, 2019, doi: 10.1021/acs.est.8b06392. [Link](http://dx.doi.org/10.1021/acs.est.8b06392)
 
 ### Contact
 
