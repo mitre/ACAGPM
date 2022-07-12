@@ -254,3 +254,12 @@ tract_pm <- ACAGPM::pull_tract_ACAG(pull_type = "External",
                                     tract_county_state = c("45001950200", "45001950300", "45001950600"))
 head(tract_pm)
 ```
+
+
+## References
+
+<a id="1">[1]</a>
+Hammer, M. S.; van Donkelaar, A.; Li, C.; Lyapustin, A.; Sayer, A. M.; Hsu, N. C.; Levy, R. C.; Garay, M. J.; Kalashnikova, O. V.; Kahn, R. A.; Brauer, M.; Apte, J. S.; Henze, D. K.; Zhang, L.; Zhang, Q.; Ford, B.; Pierce, J. R.; and Martin, R. V., Global Estimates and Long-Term Trends of Fine Particulate Matter Concentrations (1998-2018)., Environ. Sci. Technol, doi: 10.1021/acs.est.0c01764, 2020. [Link](https://pubs.acs.org/doi/full/10.1021/acs.est.0c01764)
+
+<a id="2">[2]</a>
+van Donkelaar, A., R. V. Martin, et al. (2019). Regional Estimates of Chemical Composition of Fine Particulate Matter using a Combined Geoscience-Statistical Method with Information from Satellites, Models, and Monitors. Environmental Science & Technology, 2019, doi: 10.1021/acs.est.8b06392. [Link](http://dx.doi.org/10.1021/acs.est.8b06392)

@@ -1,6 +1,6 @@
 Package: ACAGPM
 Title: Area-Weighted Mean Particulate Matter Values from Washington University's Atmostpheric Composition Analysis Group by Geography
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Arthur", "Liberatore", email = "aliberatore@mitre.org", role = c("aut", "cre")),
     person("Julianna", "Bernardi", email = "jbernardi@mitre.org", role = c("aut")),
