@@ -87,7 +87,7 @@ get_state_geo <- function(st, acag, county_df){
   }
 
   # CRS needs to line up
-  new_acag <- raster::projectRaster(acag, crs = raster::crs(new_geo))
+  new_acag <- raster::projectRaster(acag, crs = "+proj=longlat +datum=NAD83 +no_defs")
   new_acag@data@names <- "Value"
 
   # Convert df to a list to be able to parallelize in mclapply
