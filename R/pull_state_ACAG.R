@@ -69,7 +69,7 @@ get_national_geo <- function(st, acag){
     dplyr::filter(.data$GEOID %in% st)
 
   # CRS needs to line up
-  new_acag <- raster::projectRaster(acag, crs = raster::crs(geo))
+  new_acag <- raster::projectRaster(acag, crs = "+proj=longlat +datum=NAD83 +no_defs")
   new_acag@data@names <- "Value"
 
   # Initialize particulate matter column

@@ -180,7 +180,7 @@ get_county_geo <- function(st, tract_df, level, acag) {
   new_geo <- lapply(cty_row.list, get_census_geo, st = st, level, tract_df.st)
 
   # CRS needs to line up
-  new_acag <- raster::projectRaster(acag, crs = raster::crs(new_geo[[1]]))
+  new_acag <- raster::projectRaster(acag, crs = "+proj=longlat +datum=NAD83 +no_defs")
   new_acag@data@names <- "Value"
 
   # Assign rownames
